@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Crc32C.NET">
-      <HintPath>Code\snappy\Crc32C.NET.dll</HintPath>
+    <Reference Include="Crc32C.NET, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Snappy\Crc32C.NET.dll</HintPath>
     </Reference>
     <Reference Include="Snappy.Console.Common">
       <HintPath>..\..\Archivy\Archivy\Code\snappy\Snappy.Console.Common.dll</HintPath>
