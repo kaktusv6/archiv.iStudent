@@ -28,40 +28,29 @@ namespace ArchivyConsole
 				string mode = args[0];
 				if (mode == "--com")
 				{
-                    string nameFile = "";
-                    for (int i = 1; i < args.Length; i++)
-                    {
-                        // Запоминаем имя файла которое передается как параметр при запуске программы
-                        nameFile = args[i];
-                        byte[] data = Encoding.UTF8.GetBytes(args[i]);
+					for (int i = 1; i < args.Length; i++)
+					{
+						// Запоминаем имя файла которое передается как параметр при запуске программы
+						string nameFile = args[i];
 
-                        // Создание файлого потока для считывания данных
-                        var fileRead = File.OpenRead(nameFile);
-                        var reader = new StreamReader(fileRead);
-                        //Path.ChangeExtension(nameFile,  ".snz");
-                        
+						// Создание файлого потока для считывания данных
+						FileStream fileRead = File.OpenRead(nameFile);
+						StreamReader reader = new StreamReader(fileRead);
 
-                        // Создание файлого потока для записи
-                        FileStream fileWrite = File.OpenWrite(Path.ChangeExtension(nameFile, ".snz"));
-
-                        // Создаем SnappyStream для сжатия данных при взятие данных из потока
-                        
-                        //var writ = SnappyCodec.Compress(data);
-                        SnappyStream compressor = new SnappyStream(fileWrite, CompressionMode.Compress);
-                        //fileWrite.Write(writ, 0, writ.Length);
-
-                        // Создаем поток который запишет сжатые файлы и сразу передаем данные из считываемого файла
-                        using (var writer = new StreamWriter(compressor))
-                        {
-                           writer.Write(reader.ReadToEnd());
-                            writer.Close();
-                        }
-                        //File.WriteAllBytes(nameFile, writ);
-
-                        fileWrite.Close();
-                        fileRead.Close();
-                        reader.Close();
-                    }
+						// Создание файлого потока для записи
+						FileStream fileWrite = File.OpenWrite(nameFile + ".sz");
+						// Создаем SnappyStream для сжатия данных при взятие данных из потока
+						SnappyStream compressor = new SnappyStream(fileWrite, CompressionMode.Compress);
+						// Создаем поток который запишет сжатые файлы и сразу передаем данный из считываемого файла
+						using (var writer = new StreamWriter(compressor))
+						{
+							writer.Write(reader.ReadToEnd());
+							writer.Close();
+						}
+						fileWrite.Close();
+						fileRead.Close();
+						reader.Close();
+					}
 				}
 				else if (mode == "--uncom")
 				{
@@ -74,7 +63,7 @@ namespace ArchivyConsole
 						FileStream fileRead = File.OpenRead(nameFile);
 
 						// Создаем SnappyStream для декодирования данных при взятие данных из потока
-                        SnappyStream decompressor = new SnappyStream(fileRead, CompressionMode.Decompress);
+						SnappyStream decompressor = new SnappyStream(fileRead, CompressionMode.Decompress);
 						// Создаем поток который считает сжатые файлы и сразу передаем данные из считываемого файла
 						StreamReader reader = new StreamReader(decompressor);
 						// Создание файлого потока для записи
