@@ -1,0 +1,13 @@
+C:\kaktusv6\Programs\C#\Archivy\Archivy\bin\Debug\Archivy.exe.config
+C:\kaktusv6\Programs\C#\Archivy\Archivy\bin\Debug\Archivy.exe
+C:\kaktusv6\Programs\C#\Archivy\Archivy\bin\Debug\Archivy.pdb
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.csprojResolveAssemblyReference.cache
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\MainWindow.baml
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\MainWindow.g.cs
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\App.g.cs
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy_MarkupCompile.cache
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.g.resources
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.Properties.Resources.resources
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.csproj.GenerateResource.Cache
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.exe
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.pdb
