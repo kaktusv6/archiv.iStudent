@@ -43,7 +43,7 @@ namespace ConsoleApplicationArchivy
 				string origName = curFile.Remove(curFile.Length -
 						fi.Extension.Length);
 
-				using (FileStream outFile = File.Create(origName))
+				using (FileStream outFile = File.Create("copy" + origName))
 				{
 					using (SnappyStream decompress = new SnappyStream(inFile, CompressionMode.Decompress))
 					{
