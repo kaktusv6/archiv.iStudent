@@ -10,29 +10,30 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>-->
-        <Menu HorizontalAlignment="Stretch" Height="20" VerticalAlignment="Top" AllowDrop="True" Grid.ColumnSpan="2">
+        <Menu HorizontalAlignment="Stretch" Height="20" VerticalAlignment="Top" AllowDrop="True">
             <MenuItem Header="Файл">
-                <MenuItem Header="New" Click="Open_MunuItem_Click"></MenuItem>
-                <MenuItem Header="Open"></MenuItem>
-                <MenuItem Header="Save"></MenuItem>
-                <MenuItem Header="SaveAs..."></MenuItem>
+                <MenuItem Header="Создать архив" Click="Open_MunuItem_Click"></MenuItem>
+                <MenuItem Header="Открыть архив"></MenuItem>
+                <MenuItem Header="Распокавать архив"></MenuItem>
+                <MenuItem Header="Сохранить как..."></MenuItem>
+                <MenuItem Header="Добавить файл"></MenuItem>
                 <Separator></Separator>
                 <MenuItem Header="Exit"></MenuItem>
             </MenuItem>
             <MenuItem Header="Правка">
-                <MenuItem Header="Undo"></MenuItem>
-                <MenuItem Header="Redo"></MenuItem>
-                <!--<Separator></Separator>-->
-                <!-- Линия разделяющая пункты мею -->
-                <MenuItem Header="Cut"></MenuItem>
-                <MenuItem Header="Copy"></MenuItem>
-                <MenuItem Header="Paste"></MenuItem>
+                <MenuItem Header="Копировать"></MenuItem>
+                <MenuItem Header="Вставить"></MenuItem>
+                <MenuItem Header="Вырезать"></MenuItem>
+                <MenuItem Header="Переименовать"></MenuItem>
+                <MenuItem Header="Удалить"></MenuItem>
             </MenuItem>
-            <MenuItem Header="Справка">
-
+            <MenuItem Header="Справка" Height="20">
+                <MenuItem Header="Помощь"></MenuItem>
+                <Separator></Separator>
+                <MenuItem Header="Об Архиваторе"></MenuItem>
             </MenuItem>
         </Menu>
-        <ListBox x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,20,0,0" VerticalAlignment="Stretch" Grid.ColumnSpan="2">
+        <ListBox x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,20,0,0" VerticalAlignment="Stretch" BorderThickness="0,1">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
