@@ -11,3 +11,5 @@ C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.Properties.Resources.r
 C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.csproj.GenerateResource.Cache
 C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.exe
 C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.pdb
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Interop.Shell32.dll
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archivy.csproj.ResolveComReference.cache
