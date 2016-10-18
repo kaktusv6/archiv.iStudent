@@ -3,17 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Archivy" Height="254.202" Width="525" WindowStartupLocation="CenterScreen">
     <Grid>
-        <!-- Определение колонок и строк в Grid -->
-        <!--<Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="20"/>
-        </Grid.RowDefinitions>-->
         <Menu HorizontalAlignment="Stretch" Height="20" VerticalAlignment="Top" AllowDrop="True">
             <MenuItem Header="Файл">
-                <MenuItem Header="Создать архив" Click="Open_MunuItem_Click"></MenuItem>
-                <MenuItem Header="Открыть архив"></MenuItem>
+                <MenuItem Header="Создать архив"></MenuItem>
+                <MenuItem Header="Открыть архив" Click="Open_Archivy_Click"></MenuItem>
                 <MenuItem Header="Распокавать архив"></MenuItem>
                 <MenuItem Header="Сохранить как..."></MenuItem>
                 <MenuItem Header="Добавить файл"></MenuItem>
@@ -45,8 +38,8 @@
                             <RowDefinition Height="20"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="{Binding nameFile}" Grid.Column="0"></TextBlock>
-                        <TextBlock Text="{Binding text}" Grid.Column="1"></TextBlock>
+                        <TextBlock Text="{Binding Name}" Grid.Column="0"></TextBlock>
+                        <TextBlock Text="{Binding Length}" Grid.Column="1"></TextBlock>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
