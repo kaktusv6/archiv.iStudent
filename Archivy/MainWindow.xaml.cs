@@ -52,6 +52,7 @@ namespace Archivy
 				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 			}
 		}
+		/* ----- Меню Файл ----- */
 		private void Create_Archivy_Click(object sender, RoutedEventArgs e)
 		{
 			SaveFileDialog createArchivy = new SaveFileDialog();
@@ -164,6 +165,7 @@ namespace Archivy
 				UpdateListBox();
 			}
 		}
+		/* ----- Меню Правка ----- */
 		private void Copy_Files_Click(object sender, RoutedEventArgs e)
 		{
 			IList selectedItems = fileList.SelectedItems;
@@ -232,6 +234,31 @@ namespace Archivy
 				}
 			}
 			UpdateListBox();
+		}
+		private void Rename_File_Click(object sender, RoutedEventArgs e)
+		{
+			if (fileList.SelectedItems.Count == 0)
+			{
+				MessageBox.Show("Выберите файл\nкоторый хотите переименовать");
+				return;
+			}
+			if (fileList.SelectedItems.Count > 1)
+			{
+				MessageBox.Show("Выберите один файл\nкоторый хотите переименовать");
+				return;
+			}
+
+			ZipArchiveEntry file = (ZipArchiveEntry)fileList.SelectedItem;
+			// выводить окно ввода имени файла
+		}
+		/* ----- Меню Справка ----- */
+		private void Help_Click(object sender, RoutedEventArgs e)
+		{
+			// Выводить отдельное окно с описанием как пользоваться
+		}
+		private void About_Click(object sender, RoutedEventArgs e)
+		{
+			// Выводить инфу о программе тоже отдельное окно
 		}
 	}
 }
