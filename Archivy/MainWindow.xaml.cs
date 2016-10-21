@@ -17,7 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+//using System.Windows.Shapes;
 
 using System.IO;
 using System.IO.Compression;
@@ -29,20 +29,55 @@ namespace Archivy
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private string pathToArchive = "";
+
 		public MainWindow()
 		{
 			InitializeComponent();
-			Loaded += MainWindow_Loaded;
+			//Loaded += MainWindow_Loaded;
 		}
 
-		void MainWindow_Loaded(object sender, RoutedEventArgs e)
-		{
+		/* Метод который выполняется перед запуском программы */
+		//void MainWindow_Loaded(object sender, RoutedEventArgs e)
+		//{
 			
-			//fileList.ItemsSource = new[] {
-			//	new { nameFile = "fileFirst.txt", text = "lol" },
-			//	new { nameFile = "fileSecond.txt", text = "lol" },
-			//	new { nameFile = "fileThrid.txt", text = "lol" }
-			//};
+		//}
+		private void UpdateListBox()
+		{
+			using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
+			{
+				Binding binding1 = new Binding();
+				binding1.Source = archive.Entries;
+				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
+			}
+		}
+		private void Create_Archivy_Click(object sender, RoutedEventArgs e)
+		{
+			SaveFileDialog createArchivy = new SaveFileDialog();
+			createArchivy.FileName = "Archive";
+			createArchivy.DefaultExt = ".zip";
+			createArchivy.Filter = "ZIP Архив (.zip)|*.zip";
+
+			Nullable<bool> result = createArchivy.ShowDialog();
+
+			if (result == true)
+			{
+				DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(Path.GetTempPath(), @"\New_Folder_For_Zip"));
+				dirInfo.Create();
+
+				ZipFile.CreateFromDirectory(dirInfo.FullName, createArchivy.FileName);
+				dirInfo.Delete();
+				pathToArchive = createArchivy.FileName;
+			}
+
+			/* Create Archive */
+			//string startPath = @"c:\example\start"; // путь до папки которую хотим архиваировать(архивируется и все содержимое)
+			//string zipPath = @"c:\example\result.zip"; // путь до полученого в результате архива
+			//string extractPath = @"c:\example\extract"; // путь до папки куда разархивировать содержимое
+
+			//ZipFile.CreateFromDirectory(startPath, zipPath); // создание архива
+
+			//ZipFile.ExtractToDirectory(zipPath, extractPath); // распаковка архива
 		}
 		private void Open_Archivy_Click(object sender, RoutedEventArgs e)
 		{
@@ -51,44 +86,114 @@ namespace Archivy
 			fileDialog.FilterIndex = 1;
 			fileDialog.CheckFileExists = true;
 			fileDialog.Multiselect = false;
-			if (fileDialog.ShowDialog() == true)
+
+			Nullable<bool> result = fileDialog.ShowDialog();
+
+			if (result == true)
 			{
 				using(ZipArchive archive = ZipFile.OpenRead(fileDialog.FileName))
 				{
 					Binding binding1 = new Binding();
 					binding1.Source = archive.Entries;
 					fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
-					//foreach (ZipArchiveEntry entry in archive.Entries)
-					//{
-						
-					//}
 				}
-			}
-			else
-			{
-				
+				pathToArchive = fileDialog.FileName;
 			}
 		}
-		private void Open_MunuItem_Click(object sender, RoutedEventArgs e)
+		private void Decompress_Archivy_Click(object sender, RoutedEventArgs e)
 		{
-			fileList.ItemsSource = new[] {
-				new { nameFile = "fileFirst.txt", text = "lol" },
-				new { nameFile = "fileSecond.txt", text = "lol" },
-				new { nameFile = "fileThrid.txt", text = "lol" }
-			};
-			//OpenFileDialog myDialog = new OpenFileDialog(); // создание окна выбора файла
-			//myDialog.Filter = "Картинки (.jpg;.gif)|*.jpg;*.gif" + "|Все файлы (*.*)|*.*"; // фильтры выбора файла
-			//myDialog.FilterIndex = 2; // какой фильтр ставить при отображение окна
-			//myDialog.CheckFileExists = true; // проверка поля с именем файла
-			//// myDialog.Multiselect = true; // выбор нескольких файлов
-			//if (myDialog.ShowDialog() == true)
-			//{
-			//	//MessageBox.Show( myDialog.FileName); // высвечивает полный путь до выбраного файла
-			//}
-			//else
-			//{
-			//	// файл не выбран
-			//}
+			if (pathToArchive == string.Empty)
+			{
+				MessageBox.Show("Откройте архив\nкоторый хотите распокавать");
+				return;
+			}
+
+			System.Windows.Forms.FolderBrowserDialog folderDialog = new System.Windows.Forms.FolderBrowserDialog();
+			System.Windows.Forms.DialogResult result = folderDialog.ShowDialog();
+			if (result.ToString() == "OK")
+			{
+				ZipFile.ExtractToDirectory(pathToArchive, folderDialog.SelectedPath);
+			}
+		}
+		private void Add_File_Click(object sender, RoutedEventArgs e)
+		{
+			// TODO: исправить добавление одинаковых элементов
+			if (pathToArchive.Length == 0)
+			{
+				MessageBox.Show("Выберите архив в который хотите добавить файлы");
+				return;
+			}
+
+			OpenFileDialog fileDialog = new OpenFileDialog();
+			fileDialog.Filter = "Все файлы (*.*)|*.*";
+			fileDialog.FilterIndex = 1;
+			fileDialog.CheckFileExists = false;
+			fileDialog.Multiselect = true;
+
+			Nullable<bool> result = fileDialog.ShowDialog();
+
+			if (result == true && pathToArchive.Length != 0)
+			{
+				string[] files = fileDialog.FileNames;
+				for (int i = 0; i < files.Length; i++)
+				{
+					FileInfo fileInfo = new FileInfo(files[i]);
+					using (FileStream fileStream = fileInfo.OpenRead())
+					{
+						using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+						{
+							using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+							{
+								foreach (ZipArchiveEntry entry in archive.Entries)
+								{
+									if (Path.GetFileName(files[i]) == Path.GetFileName(entry.FullName))
+									{
+										files[i] = Path.GetDirectoryName(files[i]) + "\\(Copy)" + Path.GetFileName(files[i]);
+									}
+								}
+
+								ZipArchiveEntry newEntry = archive.CreateEntry(Path.GetFileName(files[i]));
+								using (Stream writer = newEntry.Open())
+								{
+									fileStream.CopyTo(writer);
+								}
+							}
+						}
+					}
+				}
+				UpdateListBox();
+			}
+		}
+		private void Copy_Files_Click(object sender, RoutedEventArgs e)
+		{
+			var selectedItems = fileList.SelectedItems;
+			object v = selectedItems[0];
+			
+			System.Diagnostics.Debug.WriteLine(v.ToString());
+		}
+		private void Past_Files_Click(object sender, RoutedEventArgs e)
+		{
+			System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
+
+			foreach (string fileName in files)
+			{
+				FileInfo fileInfo = new FileInfo(fileName);
+				using (FileStream fileStream = fileInfo.OpenRead())
+				{
+					using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+					{
+						using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+						{
+							ZipArchiveEntry entry = archive.CreateEntry(Path.GetFileName(fileName));
+							using (Stream writer = entry.Open())
+							{
+								fileStream.CopyTo(writer);
+							}
+						}
+					}
+				}
+			}
+			UpdateListBox();
 		}
 	}
 }
