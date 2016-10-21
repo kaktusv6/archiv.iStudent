@@ -175,17 +175,25 @@ namespace Archivy
 		{
 			System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
 
-			foreach (string fileName in files)
+			for (int i = 0; i < files.Count; i++)
 			{
-				FileInfo fileInfo = new FileInfo(fileName);
+				FileInfo fileInfo = new FileInfo(files[i]);
 				using (FileStream fileStream = fileInfo.OpenRead())
 				{
 					using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
 					{
 						using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
 						{
-							ZipArchiveEntry entry = archive.CreateEntry(Path.GetFileName(fileName));
-							using (Stream writer = entry.Open())
+							foreach (ZipArchiveEntry entry in archive.Entries)
+							{
+								if (Path.GetFileName(files[i]) == Path.GetFileName(entry.FullName))
+								{
+									files[i] = Path.GetDirectoryName(files[i]) + "\\(Copy)" + Path.GetFileName(files[i]);
+								}
+							}
+
+							ZipArchiveEntry entryFile = archive.CreateEntry(Path.GetFileName(files[i]));
+							using (Stream writer = entryFile.Open())
 							{
 								fileStream.CopyTo(writer);
 							}
