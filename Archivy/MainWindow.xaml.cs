@@ -21,6 +21,7 @@ using System.Windows.Navigation;
 
 using System.IO;
 using System.IO.Compression;
+using System.Collections;
 
 namespace Archivy
 {
@@ -117,7 +118,6 @@ namespace Archivy
 		}
 		private void Add_File_Click(object sender, RoutedEventArgs e)
 		{
-			// TODO: исправить добавление одинаковых элементов
 			if (pathToArchive.Length == 0)
 			{
 				MessageBox.Show("Выберите архив в который хотите добавить файлы");
@@ -166,10 +166,13 @@ namespace Archivy
 		}
 		private void Copy_Files_Click(object sender, RoutedEventArgs e)
 		{
-			var selectedItems = fileList.SelectedItems;
-			object v = selectedItems[0];
-			
-			System.Diagnostics.Debug.WriteLine(v.ToString());
+			IList selectedItems = fileList.SelectedItems;
+			string files = string.Empty;
+			foreach(object file in selectedItems)
+			{
+				files += file + "\n";
+			}
+			MessageBox.Show(files);
 		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
@@ -196,6 +199,33 @@ namespace Archivy
 							using (Stream writer = entryFile.Open())
 							{
 								fileStream.CopyTo(writer);
+							}
+						}
+					}
+				}
+			}
+			UpdateListBox();
+		}
+		private void Delete_Files_Click(object sender, RoutedEventArgs e)
+		{
+			if (fileList.SelectedItems.Count == 0)
+			{
+				MessageBox.Show("Выберите файлы которые хотите удалить");
+				return;
+			}
+
+			IList selectedFiles = fileList.SelectedItems;
+			foreach(ZipArchiveEntry entry in selectedFiles)
+			{
+				using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+				{
+					using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+					{
+						for(int i = 0; i < archive.Entries.Count; i++)
+						{
+							if (entry.FullName == archive.Entries[i].FullName)
+							{
+								archive.Entries[i].Delete();
 							}
 						}
 					}
