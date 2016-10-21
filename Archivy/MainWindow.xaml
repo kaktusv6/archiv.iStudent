@@ -5,19 +5,15 @@
     <Grid Grid.IsSharedSizeScope="True">
         <Menu HorizontalAlignment="Stretch" Height="20" VerticalAlignment="Top" AllowDrop="True">
             <MenuItem Header="Файл">
-                <MenuItem Header="Создать архив"></MenuItem>
+                <MenuItem Header="Создать архив" Click="Create_Archivy_Click"></MenuItem>
                 <MenuItem Header="Открыть архив" Click="Open_Archivy_Click"></MenuItem>
-                <MenuItem Header="Распаковать архив"></MenuItem>
-                <MenuItem Header="Сохранить как..."></MenuItem>
-                <MenuItem Header="Добавить файл"></MenuItem>
-                <Separator></Separator>
-                <MenuItem Header="Exit"></MenuItem>
+                <MenuItem Header="Распаковать архив" Click="Decompress_Archivy_Click"></MenuItem>
+                <MenuItem Header="Добавить файлы" Click="Add_File_Click"></MenuItem>
             </MenuItem>
             <MenuItem Header="Правка">
-                <MenuItem Header="Копировать"></MenuItem>
-                <MenuItem Header="Вставить"></MenuItem>
-                <MenuItem Header="Вырезать"></MenuItem>
-                <MenuItem Header="Переименовать"></MenuItem>
+                <MenuItem Header="Копировать" Click="Copy_Files_Click"></MenuItem>
+                <MenuItem Header="Вставить" Click="Past_Files_Click"></MenuItem>
+                <MenuItem Header="Переименовать" ></MenuItem>
                 <MenuItem Header="Удалить"></MenuItem>
             </MenuItem>
             <MenuItem Header="Справка" Height="20">
@@ -28,8 +24,8 @@
         </Menu>
         <Grid Margin="0,20,0.4,-20.2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" SharedSizeGroup="col1"/>
-                <ColumnDefinition Width="auto" SharedSizeGroup="col2"/>
+                <ColumnDefinition Width="200" SharedSizeGroup="col1"/>
+                <ColumnDefinition Width="100" SharedSizeGroup="col2"/>
                 <ColumnDefinition Width="auto" SharedSizeGroup="col3"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -38,10 +34,10 @@
             <TextBlock Text="Название файла" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBlock>
             <TextBlock Text="Размер" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBlock>
             <TextBlock Text="Поле для остальной информации" Grid.Column="2" VerticalAlignment="center" HorizontalAlignment="Stretch"></TextBlock>
-            <GridSplitter Grid.Column="0" Width="1" HorizontalAlignment="Right" />
-            <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Right" />
+            <GridSplitter Grid.Column="0" Width="2" HorizontalAlignment="Right" />
+            <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Right" />
         </Grid>
-        <ListBox x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,40,0.4,-0.2" VerticalAlignment="Stretch" BorderThickness="0,1">
+        <ListBox x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,40,0.4,-0.2" VerticalAlignment="Stretch" BorderThickness="0,1" SelectionMode="Extended">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -56,8 +52,6 @@
                         <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"></TextBlock>
                         <TextBlock Text="{Binding Length}" Grid.Column="1"></TextBlock>
                         <TextBlock Text="Остальная информация" Grid.Column="2"></TextBlock>
-                        <GridSplitter Grid.Column="0" Width="1" HorizontalAlignment="Right" />
-                        <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Right" />
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
