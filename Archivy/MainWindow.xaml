@@ -14,7 +14,7 @@
                 <MenuItem Header="Копировать" Click="Copy_Files_Click"></MenuItem>
                 <MenuItem Header="Вставить" Click="Past_Files_Click"></MenuItem>
                 <MenuItem Header="Переименовать" ></MenuItem>
-                <MenuItem Header="Удалить"></MenuItem>
+                <MenuItem Header="Удалить" Click="Delete_Files_Click"></MenuItem>
             </MenuItem>
             <MenuItem Header="Справка" Height="20">
                 <MenuItem Header="Помощь"></MenuItem>
@@ -31,6 +31,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
             </Grid.RowDefinitions>
+            
             <TextBlock Text="Название файла" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBlock>
             <TextBlock Text="Размер" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch"></TextBlock>
             <TextBlock Text="Поле для остальной информации" Grid.Column="2" VerticalAlignment="center" HorizontalAlignment="Stretch"></TextBlock>
