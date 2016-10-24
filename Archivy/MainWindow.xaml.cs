@@ -31,10 +31,11 @@ namespace Archivy
 	public partial class MainWindow : Window
 	{
 		private string pathToArchive = "";
-
+		private string nameTmpDirectory = @"\Archivy\";
 		public MainWindow()
 		{
 			InitializeComponent();
+			Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)));
 			//Loaded += MainWindow_Loaded;
 		}
 
@@ -51,6 +52,22 @@ namespace Archivy
 				binding1.Source = archive.Entries;
 				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 			}
+		}
+		private void ResetTmpDirectory()
+		{
+			Directory.Delete(
+				Path.Combine(
+					Path.GetTempPath(),
+					nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)
+				),
+				true
+			);
+			Directory.CreateDirectory(
+				Path.Combine(
+					Path.GetTempPath(),
+					nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)
+				)
+			);
 		}
 		/* ----- Меню Файл ----- */
 		private void Create_Archivy_Click(object sender, RoutedEventArgs e)
@@ -96,6 +113,7 @@ namespace Archivy
 				using(ZipArchive archive = ZipFile.OpenRead(fileDialog.FileName))
 				{
 					Binding binding1 = new Binding();
+					// TODO: изменить список файлов убрав от туда папки
 					binding1.Source = archive.Entries;
 					fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 				}
@@ -167,14 +185,31 @@ namespace Archivy
 		}
 		/* ----- Меню Правка ----- */
 		private void Copy_Files_Click(object sender, RoutedEventArgs e)
-		{
-			IList selectedItems = fileList.SelectedItems;
-			string files = string.Empty;
-			foreach(object file in selectedItems)
+		{	
+			ResetTmpDirectory();
+			IList selectedFiles = fileList.SelectedItems;
+			System.Collections.Specialized.StringCollection files = new System.Collections.Specialized.StringCollection();
+			foreach (ZipArchiveEntry entry in selectedFiles)
 			{
-				files += file + "\n";
+				using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+				{
+					using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+					{
+						for (int i = 0; i < archive.Entries.Count; i++)
+						{
+							if (entry.FullName == archive.Entries[i].FullName)
+							{
+								string file = Path.Combine(Path.GetTempPath(), nameTmpDirectory, @entry.Name);
+								
+								archive.Entries[i].ExtractToFile(file);
+								files.Add(file);
+							}
+						}
+					}
+				}
 			}
-			MessageBox.Show(files);
+
+			Clipboard.SetFileDropList(files);
 		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
