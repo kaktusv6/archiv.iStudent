@@ -211,6 +211,28 @@ namespace Archivy
 
 			Clipboard.SetFileDropList(files);
 		}
+		private void Cut_Files_Click(object sender, RoutedEventArgs e)
+		{
+			Copy_Files_Click(sender, e);
+			IList selectedFiles = fileList.SelectedItems;
+			foreach (ZipArchiveEntry entry in selectedFiles)
+			{
+				using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+				{
+					using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+					{
+						for (int i = 0; i < archive.Entries.Count; i++)
+						{
+							if (entry.FullName == archive.Entries[i].FullName)
+							{
+								archive.Entries[i].Delete();
+							}
+						}
+					}
+				}
+			}
+			UpdateListBox();
+		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
 			System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
@@ -284,6 +306,7 @@ namespace Archivy
 			}
 
 			ZipArchiveEntry file = (ZipArchiveEntry)fileList.SelectedItem;
+			
 			// выводить окно ввода имени файла
 		}
 		/* ----- Меню Справка ----- */
