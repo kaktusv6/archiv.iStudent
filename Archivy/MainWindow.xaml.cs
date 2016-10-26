@@ -49,7 +49,15 @@ namespace Archivy
 			using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
 			{
 				Binding binding1 = new Binding();
-				binding1.Source = archive.Entries;
+				List<ZipArchiveEntry> list = new List<ZipArchiveEntry>();
+				foreach (ZipArchiveEntry entyre in archive.Entries)
+				{
+					if (Path.GetExtension(entyre.Name) != string.Empty)
+					{
+						list.Add(entyre);
+					}
+				}
+				binding1.Source = list;
 				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 			}
 		}
@@ -110,14 +118,8 @@ namespace Archivy
 
 			if (result == true)
 			{
-				using(ZipArchive archive = ZipFile.OpenRead(fileDialog.FileName))
-				{
-					Binding binding1 = new Binding();
-					// TODO: изменить список файлов убрав от туда папки
-					binding1.Source = archive.Entries;
-					fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
-				}
 				pathToArchive = fileDialog.FileName;
+				UpdateListBox();
 			}
 		}
 		private void Decompress_Archivy_Click(object sender, RoutedEventArgs e)
@@ -308,6 +310,9 @@ namespace Archivy
 			ZipArchiveEntry file = (ZipArchiveEntry)fileList.SelectedItem;
 			
 			// выводить окно ввода имени файла
+			WindowRename windowRename = new WindowRename(pathToArchive, file.Name);
+			windowRename.ShowDialog();
+			UpdateListBox();
 		}
 		/* ----- Меню Справка ----- */
 		private void Help_Click(object sender, RoutedEventArgs e)
