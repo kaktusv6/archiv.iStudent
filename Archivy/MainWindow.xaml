@@ -3,6 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Archivy" Height="334.874" Width="796.428" WindowStartupLocation="CenterScreen"
         Icon="1477398164_folder.ico">
+    <Window.Resources>
+        <Style x:Key="ColGray" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Background" Value="Gray"/>
+        </Style>
+    </Window.Resources>
     <Grid Grid.IsSharedSizeScope="True">
         <Menu HorizontalAlignment="Stretch" Height="20" VerticalAlignment="Top" AllowDrop="True">
             <MenuItem Header="Файл">
@@ -32,10 +37,7 @@
                         <GridViewColumn Width="110" Header="Исходный Размер" DisplayMemberBinding="{Binding Length}"/>
                         <GridViewColumn Width="100" Header="Дата изменения" DisplayMemberBinding="{Binding LastWriteTime}"/>
                         <GridViewColumn Header="Сжатый размер" DisplayMemberBinding="{Binding CompressedLength}"/>
-                        <!--<GridViewColumn  Width="100" />-->
                     </GridView.Columns>
-                    
-                    <!--<Image Source="{Binding Path=((System.Drawing.Icon)System.Drawing.Icon.ExtractAssociatedIcon(FullName)).ToImageSource()}"/>-->
                 </GridView>
             </ListView.View>
         </ListView>
