@@ -19,21 +19,42 @@ using System.Collections;
 namespace Archivy
 {
 	/// <summary>
-	/// Логика взаимодействия для WindowRename.xaml
+	/// Логика взаимодействия для Window1.xaml
 	/// </summary>
 	public partial class WindowRename : Window
 	{
-		string pathToArchive = string.Empty;
-		ZipArchiveEntry entyre;
-
+		private string pathToArchive = string.Empty;
+		private string oldName;
 		public WindowRename()
 		{
 			InitializeComponent();
 		}
-		public WindowRename(string path, ZipArchiveEntry e)
+		public WindowRename(string path, string _oldName)
 		{
 			pathToArchive = path;
-			entyre = e;
+			oldName = _oldName;
+		}
+
+		private void Rename_Button_Click(object sender, RoutedEventArgs e)
+		{
+			using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+			{
+				using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+				{
+					ZipArchiveEntry oldEntry = archive.GetEntry(oldName);
+					ZipArchiveEntry newEntry = archive.CreateEntry(textBox.GetLineText(0));
+
+					using(Stream oldStream = oldEntry.Open())
+					using(Stream newStream = newEntry.Open())
+					{
+						oldStream.CopyTo(newStream);
+					}
+
+					oldEntry.Delete();
+				}
+			}
+
+			Close();
 		}
 	}
 }
