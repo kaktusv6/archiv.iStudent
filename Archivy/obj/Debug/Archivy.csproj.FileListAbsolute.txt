@@ -33,3 +33,5 @@ C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archive.exe
 C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\Archive.pdb
 C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\WindowRename.baml
 C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\WindowRename.g.cs
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\WindowAbout.baml
+C:\kaktusv6\Programs\C#\Archivy\Archivy\obj\Debug\WindowAbout.g.cs

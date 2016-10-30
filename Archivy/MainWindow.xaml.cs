@@ -310,17 +310,22 @@ namespace Archivy
 			ZipArchiveEntry file = (ZipArchiveEntry)fileList.SelectedItem;
 			
 			// выводить окно ввода имени файла
-			WindowRename windowRename = new WindowRename(pathToArchive, file.Name);
+			//WindowRename windowRename = new WindowRename();
+			WindowRename windowRename = new WindowRename(pathToArchive, file.FullName);
 			windowRename.ShowDialog();
 			UpdateListBox();
 		}
 		/* ----- Меню Справка ----- */
 		private void Help_Click(object sender, RoutedEventArgs e)
 		{
+			//System.Windows.Forms.Help.ShowHelp(System.Windows.Forms.Control(), @"help.chm");
+
 			// Выводить отдельное окно с описанием как пользоваться
 		}
 		private void About_Click(object sender, RoutedEventArgs e)
 		{
+			WindowAbout winAbout = new WindowAbout();
+			winAbout.ShowDialog();
 			// Выводить инфу о программе тоже отдельное окно
 		}
 	}
