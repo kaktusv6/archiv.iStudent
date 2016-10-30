@@ -10,7 +10,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+//using System.Windows.Shapes;
 
 using System.IO;
 using System.IO.Compression;
@@ -24,15 +24,18 @@ namespace Archivy
 	public partial class WindowRename : Window
 	{
 		private string pathToArchive = string.Empty;
-		private string oldName;
+		private string oldName = string.Empty;
 		public WindowRename()
 		{
 			InitializeComponent();
 		}
 		public WindowRename(string path, string _oldName)
 		{
+			InitializeComponent();
+
 			pathToArchive = path;
 			oldName = _oldName;
+			textBox.Text = Path.GetFileName(_oldName);
 		}
 
 		private void Rename_Button_Click(object sender, RoutedEventArgs e)
@@ -44,8 +47,8 @@ namespace Archivy
 					ZipArchiveEntry oldEntry = archive.GetEntry(oldName);
 					ZipArchiveEntry newEntry = archive.CreateEntry(textBox.GetLineText(0));
 
-					using(Stream oldStream = oldEntry.Open())
-					using(Stream newStream = newEntry.Open())
+					using (Stream oldStream = oldEntry.Open())
+					using (Stream newStream = newEntry.Open())
 					{
 						oldStream.CopyTo(newStream);
 					}
