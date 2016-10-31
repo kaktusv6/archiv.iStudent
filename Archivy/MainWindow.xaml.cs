@@ -96,15 +96,6 @@ namespace Archivy
 				dirInfo.Delete();
 				pathToArchive = createArchivy.FileName;
 			}
-
-			/* Create Archive */
-			//string startPath = @"c:\example\start"; // путь до папки которую хотим архиваировать(архивируется и все содержимое)
-			//string zipPath = @"c:\example\result.zip"; // путь до полученого в результате архива
-			//string extractPath = @"c:\example\extract"; // путь до папки куда разархивировать содержимое
-
-			//ZipFile.CreateFromDirectory(startPath, zipPath); // создание архива
-
-			//ZipFile.ExtractToDirectory(zipPath, extractPath); // распаковка архива
 		}
 		private void Open_Archivy_Click(object sender, RoutedEventArgs e)
 		{
@@ -179,7 +170,7 @@ namespace Archivy
                 for (int i = 0; i < files.Length; i++)
                 {
                     FileInfo fileInfo = new FileInfo(files[i]);
-                    String FileS = fileInfo.ToString();
+                    string FileS = fileInfo.ToString();
 
                     if (extens.IndexOf(fileInfo.Extension) != -1)
                     {
@@ -291,12 +282,22 @@ namespace Archivy
 		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
-			//String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
+			String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
 			System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
 
 			for (int i = 0; i < files.Count; i++)
 			{
-				FileInfo fileInfo = new FileInfo(files[i]);
+				bool isDocument = extens.IndexOf(Path.GetExtension(files[i])) != -1;
+
+				string fileInfoStr = files[i];
+
+				if (isDocument)
+				{
+					fileInfoStr = ArchivySnappy.Compress(files[i]);
+				}
+
+				FileInfo fileInfo = new FileInfo(fileInfoStr);
+				
 				using (FileStream fileStream = fileInfo.OpenRead())
 				{
 					using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
@@ -319,6 +320,12 @@ namespace Archivy
 						}
 					}
 				}
+
+				if(isDocument)
+				{
+					fileInfo.Delete();
+				}
+
 			}
 			UpdateListBox();
 		}
