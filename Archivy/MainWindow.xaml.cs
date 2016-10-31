@@ -403,7 +403,7 @@ namespace Archivy
                 string[] files = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 foreach (string file in files)
                 {
-                    FileInfo fileInfo = new FileInfo(file);
+                    FileInfo fileInfo = new FileInfo(ArchivySnappy.Compress(file));
                     using (FileStream fileStream = fileInfo.OpenRead())
                     {
                         using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
@@ -426,6 +426,7 @@ namespace Archivy
                             }
                         }
                     }
+                    fileInfo.Delete();
                 }
                 UpdateListBox();
             }
