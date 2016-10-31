@@ -124,7 +124,7 @@ namespace Archivy
 		}
         private void Decompress_Archivy_Click(object sender, RoutedEventArgs e)
         {
-            String extens = ".doc .docx .rtf .txt .html . xls . xlsx";
+			String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
             if (pathToArchive == string.Empty)
             {
                 MessageBox.Show("Откройте архив\nкоторый хотите распаковать");
@@ -138,21 +138,16 @@ namespace Archivy
                 ZipArchive archiv = ZipFile.OpenRead(pathToArchive);
                 foreach (ZipArchiveEntry entry in archiv.Entries)
                 {
-
                     String fullName = Path.Combine(folderDialog.SelectedPath, entry.FullName);
                     entry.ExtractToFile(fullName+".sz");
                     FileInfo entryInfo = new FileInfo(Path.GetFullPath(entry.FullName));
                     
                     if (extens.IndexOf(entryInfo.Extension) != -1)
                     {
-
                         ArchivySnappy.Decompress(fullName+".sz");
                     }
                     File.Delete(fullName + ".sz");
                 }
-
-
-                //ZipFile.ExtractToDirectory(pathToArchive, folderDialog.SelectedPath);
             }
         }
         private void Add_File_Click(object sender, RoutedEventArgs e)
@@ -226,8 +221,11 @@ namespace Archivy
 		private void Copy_Files_Click(object sender, RoutedEventArgs e)
 		{	
 			ResetTmpDirectory();
+
+			String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
 			IList selectedFiles = fileList.SelectedItems;
 			System.Collections.Specialized.StringCollection files = new System.Collections.Specialized.StringCollection();
+			
 			foreach (ZipArchiveEntry entry in selectedFiles)
 			{
 				using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
@@ -238,10 +236,29 @@ namespace Archivy
 						{
 							if (entry.FullName == archive.Entries[i].FullName)
 							{
-								string file = Path.Combine(Path.GetTempPath(), nameTmpDirectory, @entry.Name);
+								bool isDocument = extens.IndexOf(Path.GetExtension(entry.Name)) != -1;
 								
+								string file = Path.Combine(Path.GetTempPath(), nameTmpDirectory, @entry.Name);
+								if (isDocument)
+								{
+									file = Path.Combine(Path.GetTempPath(), nameTmpDirectory, @entry.Name + ".sz");
+								}
+
 								archive.Entries[i].ExtractToFile(file);
-								files.Add(file);
+
+								if (isDocument)
+								{
+									FileInfo f = new FileInfo(file);
+
+									ArchivySnappy.Decompress(file);
+									f.Delete();
+									files.Add(file.Remove(file.Length - 3));
+								}
+								else
+								{
+									files.Add(file);
+								}
+								
 							}
 						}
 					}
@@ -274,6 +291,7 @@ namespace Archivy
 		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
+			//String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
 			System.Collections.Specialized.StringCollection files = Clipboard.GetFileDropList();
 
 			for (int i = 0; i < files.Count; i++)
@@ -405,5 +423,15 @@ namespace Archivy
                 UpdateListBox();
             }
         }
-        }
+		~MainWindow()
+		{
+			Directory.Delete(
+				Path.Combine(
+					Path.GetTempPath(),
+					nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)
+				),
+				true
+			);
+		}
+    }
 }
