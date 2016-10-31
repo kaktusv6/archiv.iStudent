@@ -365,5 +365,45 @@ namespace Archivy
 			winAbout.ShowDialog();
 			// Выводить инфу о программе тоже отдельное окно
 		}
-	}
+        public void dropfile(object sender, DragEventArgs e)
+        {
+            if (pathToArchive.Length == 0)
+            {
+                MessageBox.Show("Выберите архив в который хотите добавить файлы");
+                return;
+            }
+            string temp;
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = e.Data.GetData(DataFormats.FileDrop, true) as string[];
+                foreach (string file in files)
+                {
+                    FileInfo fileInfo = new FileInfo(file);
+                    using (FileStream fileStream = fileInfo.OpenRead())
+                    {
+                        using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+                        {
+                            using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                            {
+                                foreach (ZipArchiveEntry entry in archive.Entries)
+                                {
+                                    if (Path.GetFileName(file) == Path.GetFileName(entry.FullName))
+                                    {
+                                        temp = Path.GetDirectoryName(file) + "\\(Copy)" + Path.GetFileName(file);
+                                    }
+                                }
+
+                                ZipArchiveEntry newEntry = archive.CreateEntry(Path.GetFileName(file));
+                                using (Stream writer = newEntry.Open())
+                                {
+                                    fileStream.CopyTo(writer);
+                                }
+                            }
+                        }
+                    }
+                }
+                UpdateListBox();
+            }
+        }
+        }
 }
