@@ -380,9 +380,9 @@ namespace Archivy
 		/* ----- Меню Справка ----- */
 		private void Help_Click(object sender, RoutedEventArgs e)
 		{
-			//System.Windows.Forms.Help.ShowHelp(System.Windows.Forms.Control(), @"help.chm");
-
-			// Выводить отдельное окно с описанием как пользоваться
+			// System.Diagnostics.Process.Start(AppDomain.CurrentDomain.BaseDirectory + @"\Help\Archive.html"); // запуск файла стандартным приложением
+			// AppDomain.CurrentDomain.BaseDirectory // путь до .exe
+			// System.Windows.Forms.Help.ShowHelp(null, "Help/Archive.html");
 		}
 		private void About_Click(object sender, RoutedEventArgs e)
 		{
