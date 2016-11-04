@@ -1,0 +1,109 @@
+﻿<html>
+	
+<head>
+	<title>Меню Правка</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="generator" content="HelpNDoc Personal Edition 4.9.2.132">
+	<meta name="keywords" content="">
+	
+	<link type="text/css" rel="stylesheet" media="all" href="css/reset.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/base.css" />
+	<link type="text/css" rel="stylesheet" media="all" href="css/hnd.css" />
+	<!--[if lte IE 8]>
+		<link type="text/css" rel="stylesheet" media="all" href="css/ielte8.css" />
+	<![endif]-->
+	<style type="text/css">
+		#topic_header
+		{
+			background-color: #EFEFEF;
+		}
+	</style>
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/hnd.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if (top.frames.length == 0)
+			{
+				var sTopicUrl = top.location.href.substring(top.location.href.lastIndexOf("/") + 1, top.location.href.length);
+				top.location.href = "Archive.html?" + sTopicUrl;
+			}
+			else
+			{
+				var bTocSelected = false;
+				(function waitForTOC()
+				{
+					if (top && top.FrameTOC && top.FrameTOC.SelectTocItem)
+					{
+						top.FrameTOC.SelectTocItem("Newtopic4");
+						bTocSelected = true;
+					}
+					if (!bTocSelected) setTimeout(function() { waitForTOC(); }, 300);
+				})();
+			}
+		});
+	</script>
+	
+	</head>
+
+<body>
+
+<div id="topic_header">
+			<div id="topic_header_content">
+				<h1 id="topic_header_text">Меню Правка</h1>
+				
+				<div id="topic_breadcrumb">
+					<a href="Newtopic2.html">Файловый мэнэджер меню и архивы</a> &rsaquo;&rsaquo; </div>
+				</div>
+			<div id="topic_header_nav">
+				<a href="Newtopic2.html"><img src="img/arrow_up.png" alt="Parent"/></a>
+				
+				<a href="Newtopic3.html"><img src="img/arrow_left.png" alt="Previous"/></a>
+				
+				<a href="Newtopic5.html"><img src="img/arrow_right.png" alt="Next"/></a>
+				
+				</div>
+			<div class="clear"></div>
+		</div>
+	<div id="topic_content">
+		
+<p></p>
+<p class="rvps2"><span class="rvts13">Меню "Правка"</span></p>
+<hr style="height: 1px; color : #000000;  background-color : #000000; border-width : 0px;">
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"КОПИРОВАТЬ"</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Эта команда доступна в режиме управления файлами. Выбираем файл , нажимаем кнопку "Копировать". Выбранные файлы сохраняются в буфере обмена, а затем их можно вставать в любую папку, при &nbsp;помощи клавиш &lt;Ctrl+C&gt;.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"ВЫРЕЗАТЬ"</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Эта команда доступна в режиме управления файлами. Выбираем файл , нажимаем кнопку "Вырезать". Выбранные файлы сохраняются в буфере обмена, а затем их можно вставать в любую папку, при &nbsp;помощи клавиш &lt;Ctrl+C&gt;, при этом этот файл удалится с архива, в котором был прежде.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"ВСТАВИТЬ"</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Эта команда доступна в режиме управления файлами. Сохраненные файлы в буфере обмена вставляем в любую папку, при &nbsp;помощи кнопки "Вставить" или клавиш &lt;Ctrl+V&gt;.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"ПЕРЕИМЕНОВАТЬ"</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Эта команда доступна в режиме управления файлами. Выбираем файл, нажимаем кнопку "Переименовать" и задаем новое имя файла в нужном месте.</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">"УДАЛИТЬ"</span></p>
+<p class="rvps2"><span class="rvts6"><br/></span></p>
+<p class="rvps2"><span class="rvts6">Эта команда доступна в режиме управления файлами, она удаляет выделенные файлы и папки в Корзину, поэтому случайно удалённые данные впоследствии можно будет восстановить. Для запуска этой команды используйте меню "Правка", кнопку "Удалить".</span></p>
+<p></p>
+<p class="rvps4"><span class="rvts11">Created with the Personal Edition of HelpNDoc: </span><a class="rvts12" href="http://www.helpndoc.com/feature-tour/create-ebooks-for-amazon-kindle">Generate Kindle eBooks with ease</a></p>
+</div>
+	
+	<div id="topic_footer">
+
+			<div id="topic_footer_content">
+				</div>
+		</div>
+	</body>
+	
+</html>
+
