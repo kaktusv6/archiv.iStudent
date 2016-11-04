@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Archivy.WindowAbout"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WindowAbout" Height="105" Width="300" WindowStartupLocation="CenterScreen" WindowState="Minimized" Icon="1477398164_folder.ico">
+        Title="WindowAbout" Height="105" Width="300" WindowStartupLocation="CenterScreen" Icon="1477398164_folder.ico">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
