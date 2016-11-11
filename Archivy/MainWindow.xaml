@@ -30,10 +30,15 @@
             </MenuItem>
         </Menu>
         <ListView x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,20,0,0" VerticalAlignment="Stretch" BorderThickness="0,1" SelectionMode="Extended" AllowDrop="True" Drop="dropfile">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <EventSetter Event="MouseDoubleClick" Handler="ClickElement"/>
+                </Style>
+            </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
-                        <GridViewColumn Header="Имя файла" DisplayMemberBinding="{Binding Name}"/>
+                        <GridViewColumn Header="Имя файла" DisplayMemberBinding="{Binding FullName}"/>
                         <GridViewColumn Width="110" Header="Исходный Размер" DisplayMemberBinding="{Binding Length}"/>
                         <GridViewColumn Width="100" Header="Дата изменения" DisplayMemberBinding="{Binding LastWriteTime}"/>
                         <GridViewColumn Header="Сжатый размер" DisplayMemberBinding="{Binding CompressedLength}"/>

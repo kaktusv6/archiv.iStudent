@@ -44,20 +44,40 @@ namespace Archivy
 		//{
 			
 		//}
-		private void UpdateListBox()
+		private void UpdateListBox(string subdirectory)
 		{
 			using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
 			{
+                List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    if (subdirectory.Length!=0)
+                    {
+                        //MessageBox.Show(entry.FullName);
+                        int count = 0;
+                        foreach (char c in entry.FullName)
+                            if (c == '/') count++;
+                        if ((entry.FullName.Replace(subdirectory, "") == entry.Name && entry.FullName != entry.Name) ^ (count == 1 && entry.FullName.EndsWith("/")))
+                        {
+                            entries.Add(entry);
+                        }
+                    }
+                    else
+                    {
+                        //MessageBox.Show(entry.FullName);
+                        int count = 0;
+                        foreach (char c in entry.FullName)
+                            if (c == '/') count++;
+                        if (entry.FullName == entry.Name ^ (count == 1 && entry.FullName.EndsWith("/")))
+                        {
+                            entries.Add(entry);
+                        }
+                    }
+                }
 				Binding binding1 = new Binding();
-				List<ZipArchiveEntry> list = new List<ZipArchiveEntry>();
-				foreach (ZipArchiveEntry entyre in archive.Entries)
-				{
-					if (Path.GetExtension(entyre.Name) != string.Empty)
-					{
-						list.Add(entyre);
-					}
-				}
-				binding1.Source = list;
+                ZipArchiveEntry back;
+                //back.FullName = subdirectory;			
+				binding1.Source = entries;
 				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 			}
 		}
@@ -110,7 +130,7 @@ namespace Archivy
 			if (result == true)
 			{
 				pathToArchive = fileDialog.FileName;
-				UpdateListBox();
+				UpdateListBox("");
 			}
 		}
         private void Decompress_Archivy_Click(object sender, RoutedEventArgs e)
@@ -206,7 +226,7 @@ namespace Archivy
                         fileInfo.Delete();
                     }
                 }
-                UpdateListBox();
+                UpdateListBox("");
             }
         }
 
@@ -283,7 +303,7 @@ namespace Archivy
 					}
 				}
 			}
-			UpdateListBox();
+			UpdateListBox("");
 		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
@@ -332,7 +352,7 @@ namespace Archivy
 				}
 
 			}
-			UpdateListBox();
+			UpdateListBox("");
 		}
 		private void Delete_Files_Click(object sender, RoutedEventArgs e)
 		{
@@ -359,7 +379,7 @@ namespace Archivy
 					}
 				}
 			}
-			UpdateListBox();
+			UpdateListBox("");
 		}
 		private void Rename_File_Click(object sender, RoutedEventArgs e)
 		{
@@ -380,7 +400,7 @@ namespace Archivy
 			//WindowRename windowRename = new WindowRename();
 			WindowRename windowRename = new WindowRename(pathToArchive, file.FullName);
 			windowRename.ShowDialog();
-			UpdateListBox();
+			UpdateListBox("");
 		}
 		/* ----- Меню Справка ----- */
 		private void Help_Click(object sender, RoutedEventArgs e)
@@ -395,6 +415,53 @@ namespace Archivy
 			winAbout.ShowDialog();
 			// Выводить инфу о программе тоже отдельное окно
 		}
+
+        public void storeFolder(string foldername, string parentfolder)
+        {
+            String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
+            string[] filecontent = Directory.GetFiles(foldername);
+            string[] directories = Directory.GetDirectories(foldername);
+            foreach (string file in filecontent)
+            {
+                string temp = file;
+                FileInfo fileInfo = new FileInfo(file);
+                if (extens.IndexOf(fileInfo.Extension) != -1 )
+                    {
+                        temp = ArchivySnappy.Compress(file);
+                        fileInfo = new FileInfo(temp);
+                    }
+
+                using (FileStream fileStream = fileInfo.OpenRead())
+                {
+                    using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+                    {
+                        using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                        {
+                            foreach (ZipArchiveEntry entry in archive.Entries)
+                            {
+                                if (Path.GetFileName(fileInfo.Name) == Path.GetFileName(entry.FullName))
+                                {
+                                    temp = Path.GetDirectoryName(fileInfo.ToString()) + "\\(Copy)" + Path.GetFileName(fileInfo.Name);
+                                }
+                            }
+
+                            ZipArchiveEntry newEntry = archive.CreateEntry(parentfolder+ "\\" + foldername + temp);
+                            using (Stream writer = newEntry.Open())
+                            {
+                                fileStream.CopyTo(writer);
+                            }
+                        }
+                    }
+                }
+                if (fileInfo.Extension == ".sz")
+                {
+                    fileInfo.Delete();
+                }
+            }
+            UpdateListBox("");
+        }
+
+        
         public void dropfile(object sender, DragEventArgs e)
         {
             String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
@@ -411,40 +478,64 @@ namespace Archivy
                 {
                     string temp = file;
                     FileInfo fileInfo = new FileInfo(file);
-                    if (extens.IndexOf(fileInfo.Extension) != -1 )
+
+                    FileAttributes attr = File.GetAttributes(file);
+                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                     {
-                        temp = ArchivySnappy.Compress(file);
-                        fileInfo = new FileInfo(temp);
+                        DirectoryInfo dir = new DirectoryInfo(file);
+                        storeFolder(dir.FullName, "");
                     }
-
-                    using (FileStream fileStream = fileInfo.OpenRead())
+                    else
                     {
-                        using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
-                        {
-                            using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
-                            {
-                                foreach (ZipArchiveEntry entry in archive.Entries)
-                                {
-                                    if (Path.GetFileName(fileInfo.Name) == Path.GetFileName(entry.FullName))
-                                    {
-                                        temp = Path.GetDirectoryName(fileInfo.ToString()) + "\\(Copy)" + Path.GetFileName(fileInfo.Name);
-                                    }
-                                }
 
-                                ZipArchiveEntry newEntry = archive.CreateEntry(Path.GetFileName(temp));
-                                using (Stream writer = newEntry.Open())
+                        if (extens.IndexOf(fileInfo.Extension) != -1 )
+                        {
+                            temp = ArchivySnappy.Compress(file);
+                            fileInfo = new FileInfo(temp);
+                        }
+
+                        using (FileStream fileStream = fileInfo.OpenRead())
+                        {
+                            using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+                            {
+                                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                                 {
-                                    fileStream.CopyTo(writer);
+                                    foreach (ZipArchiveEntry entry in archive.Entries)
+                                    {
+                                        if (Path.GetFileName(fileInfo.Name) == Path.GetFileName(entry.FullName))
+                                        {
+                                            temp = Path.GetDirectoryName(fileInfo.ToString()) + "\\(Copy)" + Path.GetFileName(fileInfo.Name);
+                                        }
+                                    }
+
+                                    ZipArchiveEntry newEntry = archive.CreateEntry(Path.GetFileName(temp));
+                                    using (Stream writer = newEntry.Open())
+                                    {
+                                        fileStream.CopyTo(writer);
+                                    }
                                 }
                             }
                         }
-                    }
-                    if (fileInfo.Extension == ".sz")
-                    {
-                        fileInfo.Delete();
+                        if (fileInfo.Extension == ".sz")
+                        {
+                            fileInfo.Delete();
+                        }
                     }
                 }
-                UpdateListBox();
+                UpdateListBox("");
+            }
+        }
+
+        public void ClickElement(object sender, MouseButtonEventArgs e)
+        {
+            //MessageBox.Show(sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", ""));
+            if (sender.ToString().EndsWith("/"))
+            {
+                UpdateListBox(sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", ""));
+            }
+            else
+            {
+                MessageBox.Show("Not implemented yet");
             }
         }
 		~MainWindow()
