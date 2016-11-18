@@ -46,5 +46,8 @@
                 </GridView>
             </ListView.View>
         </ListView>
+        <Button x:Name="Back" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Margin="770,20,0,0" ToolTip="Назад" Click="Back_Click">
+            <Image Source="ico-back2.png"></Image>
+        </Button>
     </Grid>
 </Window>

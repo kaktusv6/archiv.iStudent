@@ -32,6 +32,7 @@ namespace Archivy
 	{
 		private string pathToArchive = "";
 		private string nameTmpDirectory = @"\Archivy\";
+        private string currentDirectory = "";
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -44,25 +45,29 @@ namespace Archivy
 		//{
 			
 		//}
-		private void UpdateListBox(string subdirectory)
+		private void UpdateListBox(string subDirectory)
 		{
 			using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
 			{
                 List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (subdirectory.Length!=0)
+                    if (subDirectory.Length != 0 && entry.FullName.IndexOf(subDirectory) == 0 && entry.FullName != subDirectory)
                     {
-                        //MessageBox.Show(entry.FullName);
+                        //MessageBox.Show("checking "+entry.FullName);
                         int count = 0;
-                        foreach (char c in entry.FullName)
+                        string entryName = entry.FullName.Remove(0, subDirectory.Length);
+                        foreach (char c in entryName)
                             if (c == '/') count++;
-                        if ((entry.FullName.Replace(subdirectory, "") == entry.Name && entry.FullName != entry.Name) ^ (count == 1 && entry.FullName.EndsWith("/")))
+                        bool isFile = count == 0 && entryName == entry.Name;
+                        bool isFolder = count == 1 && entryName.EndsWith("/");
+                        if (isFile ^ isFolder)
                         {
+                            //MessageBox.Show("Adding " + entryName);
                             entries.Add(entry);
                         }
                     }
-                    else
+                    else if(subDirectory.Length == 0)
                     {
                         //MessageBox.Show(entry.FullName);
                         int count = 0;
@@ -80,6 +85,7 @@ namespace Archivy
 				binding1.Source = entries;
 				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 			}
+            currentDirectory = subDirectory;
 		}
 		private void ResetTmpDirectory()
 		{
@@ -416,7 +422,7 @@ namespace Archivy
 			// Выводить инфу о программе тоже отдельное окно
 		}
 
-        public void storeFolder(string foldername, string parentfolder)
+        private void storeFolder(string foldername, string parentfolder)
         {
             String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
             string[] filecontent = Directory.GetFiles(foldername);
@@ -462,7 +468,7 @@ namespace Archivy
         }
 
         
-        public void dropfile(object sender, DragEventArgs e)
+        private void dropfile(object sender, DragEventArgs e)
         {
             String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
             if (pathToArchive.Length == 0)
@@ -526,12 +532,13 @@ namespace Archivy
             }
         }
 
-        public void ClickElement(object sender, MouseButtonEventArgs e)
+        private void ClickElement(object sender, MouseButtonEventArgs e)
         {
             //MessageBox.Show(sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", ""));
             if (sender.ToString().EndsWith("/"))
             {
-                UpdateListBox(sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", ""));
+                currentDirectory = sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", "");
+                UpdateListBox(currentDirectory);
             }
             else
             {
@@ -548,5 +555,20 @@ namespace Archivy
 				true
 			);
 		}
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            //MessageBox.Show(currentDirectory);
+            if (currentDirectory != "")
+            {
+                currentDirectory = currentDirectory.Remove(currentDirectory.Length - 1, 1);
+                while (currentDirectory.Length != 0 && currentDirectory[currentDirectory.Length - 1] != '/')
+                {
+                    currentDirectory = currentDirectory.Remove(currentDirectory.Length - 1, 1);
+                }
+                //MessageBox.Show(currentDirectory);
+                UpdateListBox(currentDirectory);
+            }
+        }
     }
 }
