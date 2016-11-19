@@ -124,7 +124,6 @@ namespace ArchivyFiles
                                     }
                                     allFilesArr[i] = Convert.ToInt32(szSnappy);
                                 }
-
                                 newArchiveFile.Write('s');
                                 newArchiveFile.Write(Convert.ToString(headByte.Length));
                                 newArchiveFile.Write('d');
