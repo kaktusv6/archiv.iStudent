@@ -22,6 +22,7 @@ using System.Windows.Navigation;
 using System.IO;
 using System.IO.Compression;
 using System.Collections;
+using ArchivyFiles;
 
 namespace Archivy
 {
@@ -35,6 +36,19 @@ namespace Archivy
         private string currentDirectory = "";
 		public MainWindow()
 		{
+
+            ArchiveSz per;
+            using (FileStream stream = new FileStream("Arch.sz", FileMode.Append))
+            {
+                per = new ArchiveSz(stream);
+            }
+            per.AddFile("test1.txt");
+            per.AddFile("test2.txt");
+            per.AddFile("test2.txt");
+            per.AddFile("test1.txt");
+            //per.AddFile("test3.txt");
+
+
 			InitializeComponent();
 			Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)));
 			//Loaded += MainWindow_Loaded;
@@ -106,6 +120,10 @@ namespace Archivy
 		/* ----- Меню Файл ----- */
 		private void Create_Archivy_Click(object sender, RoutedEventArgs e)
 		{
+
+
+
+
 			SaveFileDialog createArchivy = new SaveFileDialog();
 			createArchivy.FileName = "Archive";
 			createArchivy.DefaultExt = ".zip";

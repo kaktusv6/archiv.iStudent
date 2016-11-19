@@ -12,78 +12,130 @@ namespace ArchivyFiles
     
     class ArchiveSz
     {
-        String pathToArchiv;
+        private string pathToArchive;
+
         public ArchiveSz(FileStream archive)
         {
             FileInfo info = new FileInfo(archive.Name);
-            pathToArchiv = info.FullName;
+            pathToArchive = info.FullName;
         }
-        public void Update(string PathToFile)
+        public void AddFile(string pathToFile)
         {
-            using (FileStream archFile = new FileStream(pathToArchiv, FileMode.Open))
+            bool ifFileEmpty = true;
+            using (FileStream archFile = new FileStream(pathToArchive, FileMode.Open))
             {                
-                string fileNameSz = ArchivySnappy.Compress(PathToFile);
+                string fileNameSz = ArchivySnappy.Compress(pathToFile);
                 FileInfo info = new FileInfo(fileNameSz);
                 long SizeFileBefore = info.Length;
 
-                info = new FileInfo(PathToFile);
+                info = new FileInfo(pathToFile);
                 long SizeFileCode = info.Length;
 
-                string allFiles = null;
-                string header = "";
+                string allFiles = string.Empty;
+                string header = string.Empty;
+                string sizeByteHead = string.Empty;
 
                 using(FileStream szArch = new FileStream(fileNameSz, FileMode.Open)){
-                    
+                    Encoding uni = Encoding.Unicode;
                     string NameFile = info.Name;
                     DateTime data = info.LastWriteTime;
 
-                    using (StreamReader readFile = new StreamReader(archFile))
+                    using (BinaryReader readFile = new BinaryReader(archFile))
                     {
-                        FileInfo buff = new FileInfo(pathToArchiv);
-                        if (buff.Length > 0)
+                        FileInfo infoArchive = new FileInfo(pathToArchive);
+                        if (infoArchive.Length > 0)
                         {
-                            allFiles = readFile.ReadLine();
+                            char buff = readFile.ReadChar();
+                            while (! char.IsLetter(buff)) // парсим количество файлов в архиве
+                            {
+                                if (char.IsDigit(buff)){
+                                    allFiles += buff;
+                                }
+                                buff = readFile.ReadChar();
+                            }
                         }
                     
-
-                    header = NameFile + " " +
-                        Convert.ToString(SizeFileBefore) + " " +
-                        Convert.ToString(SizeFileCode) + " " +
-                        data.ToString();
-
-                    byte[] headByte = new byte[1000];
-                    Encoding uni = Encoding.Unicode;
-                    headByte = uni.GetBytes(header);
-                        if (allFiles == null)
+                        header = NameFile + " " +
+                            Convert.ToString(SizeFileBefore) + " " +
+                            Convert.ToString(SizeFileCode) + " " +
+                            data.ToString();
+                        
+                        byte[] headByte = uni.GetBytes(header);
+                        string sv = uni.GetString(headByte);
+                        if (allFiles == string.Empty)
                         {
-                            using(StreamWriter write = new StreamWriter(archFile)){
-                                write.WriteLine("1");
-                                write.WriteLine(headByte);
+                            ifFileEmpty = false;
+                            using (BinaryWriter write = new BinaryWriter(archFile))// запись заголовка
+                            {
+                                write.Write("1");
+                                write.Write('s' + Convert.ToString(headByte.Length) + 'd');
+                                write.Write(headByte);
                             }
-                                using (FileStream Arch = new FileStream(pathToArchiv, FileMode.Append))
-                                {
-                                    szArch.CopyTo(Arch);
-                                }
+                            using (FileStream Arch = new FileStream(pathToArchive, FileMode.Append))//запись содержимого
+                            {
+                                szArch.CopyTo(Arch);
+                            }
                         }
                         else
                         {
-                            string newArchiv = pathToArchiv + "1";
-                            using (StreamWriter newArchiveFile = new StreamWriter(newArchiv))
+                            string newArchiv = pathToArchive + "1";
+                            using (BinaryWriter newArchiveFile = new BinaryWriter(new FileStream(newArchiv, FileMode.Append)))
                             {
-                                using (StreamReader FileArchiveRead = new StreamReader(archFile)){
-                                    newArchiveFile.WriteLine(Convert.ToString(Convert.ToInt32(allFiles) + 1));
-                                    for (int i = 0; i < Convert.ToInt32(allFiles); i++)
-                                    {
-                                        newArchiveFile.WriteLine(FileArchiveRead.ReadLine());//Считываем посточно: одна строка - один блок байтов(файл) в архиве
+                                int allHead = Convert.ToInt32(allFiles);
+                                int sizeHead = 0;
+                                newArchiveFile.Write(Convert.ToString(allHead + 1));
+                                int[] allFilesArr = new int[allHead];
+
+                                for (int i = 0; i < allHead; i++)
+                                {
+                                    char buff = readFile.ReadChar();
+                                    string buffStr = string.Empty;
+                                    while (buff != 'd') // парсим длинну заголовка
+                                    { 
+                                        if (char.IsDigit(buff))
+                                        {
+                                            buffStr += buff;
+                                        }
+                                        buff = readFile.ReadChar();
                                     }
-                                    newArchiveFile.WriteLine(headByte);
-                                    for (int i = 0; i < Convert.ToInt32(allFiles); i++)
+                                    if (buffStr != string.Empty)
                                     {
-                                        newArchiveFile.Write(FileArchiveRead.Read());//Считываем посточно: одна строка - один блок байтов(файл) в архиве
+                                        sizeHead = Convert.ToInt32(buffStr);
                                     }
-                                }   
+                                    newArchiveFile.Write('s' + Convert.ToString(sizeHead) + 'd');
+
+                                    byte[] headBytes = readFile.ReadBytes(sizeHead);
+                                    string headStr = uni.GetString(headBytes);
+                                    string szSnappy = string.Empty;
+
+                                    newArchiveFile.Write(headBytes);
+                                                                        
+                                    int j = 1;
+                                    buff = headStr[0]; // Узнаем длинну закодированного Snappy файла
+                                    while (buff != ' '){
+                                        buff = headStr[j];
+                                        j++;
+                                    }
+                                    buff = headStr[j];
+                                    while(buff != ' '){
+                                        szSnappy += headStr[j];
+                                        j++;
+                                        buff = headStr[j];
+                                    }
+                                    allFilesArr[i] = Convert.ToInt32(szSnappy);
+                                }
+
+                                newArchiveFile.Write('s');
+                                newArchiveFile.Write(Convert.ToString(headByte.Length));
+                                newArchiveFile.Write('d');
+                                newArchiveFile.Write(headByte);
+
+                                for (int j = 0; j < allFilesArr.Length; j++)
+                                {
+                                    newArchiveFile.Write(readFile.ReadBytes(allFilesArr[j]));
+                                }
                             }
-                            using (FileStream Arch = new FileStream(pathToArchiv, FileMode.Append))
+                            using (FileStream Arch = new FileStream(newArchiv, FileMode.Append))
                             {
                                 szArch.CopyTo(Arch);
                             }
@@ -91,6 +143,14 @@ namespace ArchivyFiles
                     } 
                 }
             }
+            if (ifFileEmpty)
+            {
+                File.Replace(pathToArchive + 1, pathToArchive, "rezerv.txt");
+            }
+        }
+        public void extractFile(string pathToFile)
+        {
+
         }
     }
 }
