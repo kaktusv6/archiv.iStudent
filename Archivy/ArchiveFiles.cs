@@ -9,9 +9,45 @@ using ConsoleApplicationArchivy;
 
 namespace ArchivyFiles
 {
+
+    class ArchiveSzEntry
+    {
+        public string name = string.Empty;
+        public string data = string.Empty;
+        public string sizeBefore = string.Empty;
+        public string sizeAfter = string.Empty;
+
+        public ArchiveSzEntry(string header)
+        {
+            int i = 0;
+            while (header[i] != '|')
+            {
+                name += header[i];
+                i++;
+            }
+
+            while (header[i] != ' '){
+                i++;
+                sizeBefore += header[i];
+            }
+            i++;
+            while (header[i] != ' ')
+            {
+                sizeAfter += header[i];
+                i++;
+            }
+            i++;
+            while (i <= header.Length-1)
+            {
+                data += header[i];
+                i++;
+            }
+        }
+    }
     
     class ArchiveSz
     {
+        public string[] archiveSzEntry;
         private string pathToArchive;
 
         public ArchiveSz(FileStream archive)
@@ -59,17 +95,19 @@ namespace ArchivyFiles
                             Convert.ToString(SizeFileBefore) + " " + 
                             Convert.ToString(SizeFileCode) + " " +
                             data.ToString();
-                        
+
+
                         byte[] headByte = uni.GetBytes(header);
-                        string sv = uni.GetString(headByte);
                         if (allFiles == string.Empty)
                         {
+                            archiveSzEntry = new string[1];
                             ifFileEmpty = false;
                             using (BinaryWriter write = new BinaryWriter(archFile))// запись заголовка
                             {
                                 write.Write("1");
                                 write.Write('s' + Convert.ToString(headByte.Length) + 'd');
                                 write.Write(headByte);
+                                archiveSzEntry[0] = header; 
                             }
                             using (FileStream Arch = new FileStream(pathToArchive, FileMode.Append))//запись содержимого
                             {
@@ -78,10 +116,12 @@ namespace ArchivyFiles
                         }
                         else
                         {
+                            archiveSzEntry = new string[Convert.ToInt32(allFiles)];
                             string newArchiv = pathToArchive + "1";
                             using (BinaryWriter newArchiveFile = new BinaryWriter(new FileStream(newArchiv, FileMode.Append)))
                             {
                                 int allHead = Convert.ToInt32(allFiles);
+                                archiveSzEntry = new string[allHead+1];
                                 int sizeHead = 0;
                                 newArchiveFile.Write(Convert.ToString(allHead + 1));
                                 int[] allFilesArr = new int[allHead];
@@ -106,6 +146,7 @@ namespace ArchivyFiles
 
                                     byte[] headBytes = readFile.ReadBytes(sizeHead);
                                     string headStr = uni.GetString(headBytes);
+                                    archiveSzEntry[i] = headStr;
                                     string szSnappy = string.Empty;
 
                                     newArchiveFile.Write(headBytes);
@@ -124,6 +165,7 @@ namespace ArchivyFiles
                                     }
                                     allFilesArr[i] = Convert.ToInt32(szSnappy);
                                 }
+                                archiveSzEntry[archiveSzEntry.Length-1] = header;
                                 newArchiveFile.Write('s');
                                 newArchiveFile.Write(Convert.ToString(headByte.Length));
                                 newArchiveFile.Write('d');
@@ -156,6 +198,7 @@ namespace ArchivyFiles
                     char sym = readFile.ReadChar();
                     string allFilesStr = string.Empty;
                     Encoding uni = Encoding.Unicode;
+                    archiveSzEntry = new string[archiveSzEntry.Length - 1];
 
                     while (!char.IsLetter(sym)) // парсим количество файлов в архиве
                     {
@@ -174,7 +217,7 @@ namespace ArchivyFiles
                     {
                         newFile.Write(Convert.ToString(allFiles - 1));
                     }
-
+                    int k = 0;
                     for (int i = 0; i < allFiles; i++) //парсим голову файлов
                     {
                         int sizeHeadInt = 0;
@@ -195,6 +238,7 @@ namespace ArchivyFiles
                         header = uni.GetString(readFile.ReadBytes(sizeHeadInt));//считал заголовочный файл
 
                         int j = 0;
+                        
                         while(header[j] != '|'){
                             nameFile += header[j];
                             j++;
@@ -214,9 +258,11 @@ namespace ArchivyFiles
                         }
                         else
                         {
+                            archiveSzEntry[k] = header;
                             newFile.Write('s' + sizeHeadStr + 'd');
                             newFile.Write(uni.GetBytes(header));
                             sizeAllSnappyCode += sizeSnappy;
+                            k++;
                         }
                     }
                     newFile.Write(readFile.ReadBytes(before));
