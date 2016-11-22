@@ -22,25 +22,21 @@ namespace ArchivyFiles
             int i = 0;
             while (header[i] != '|')
             {
-                name += header[i];
-                i++;
+                name += header[i++];
             }
 
             while (header[i] != ' '){
-                i++;
-                sizeBefore += header[i];
+                sizeBefore += header[++i];
             }
             i++;
             while (header[i] != ' ')
             {
-                sizeAfter += header[i];
-                i++;
+                sizeAfter += header[i++];
             }
             i++;
             while (i <= header.Length-1)
             {
-                data += header[i];
-                i++;
+                data += header[i++];
             }
         }
     }
@@ -52,8 +48,10 @@ namespace ArchivyFiles
 
         public ArchiveSz(FileStream archive)
         {
-            FileInfo info = new FileInfo(archive.Name);
-            pathToArchive = info.FullName;
+            pathToArchive = archive.Name;
+
+			//FileInfo info = new FileInfo(archive.Name);
+			//pathToArchive = info.FullName;
         }
         public void addFile(string pathToFile)
         {
