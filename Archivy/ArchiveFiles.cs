@@ -50,6 +50,42 @@ namespace ArchivyFiles
         {
             pathToArchive = archive.Name;
 
+            using(BinaryReader readFile = new BinaryReader(archive)){
+                char buff = readFile.ReadChar();
+                string allFilesStr = string.Empty;
+                while (!char.IsLetter(buff)) // парсим количество файлов в архиве
+                {
+                    if (char.IsDigit(buff))
+                    {
+                        allFilesStr += buff;
+                    }
+                    buff = readFile.ReadChar();
+                }
+                int allHead = Convert.ToInt32(allFilesStr);
+                archiveSzEntry = new ArchiveSzEntry[allHead];
+                for (int i = 0; i < allHead; i++)
+                {
+
+                    string sizeHeadStr = string.Empty;
+                    while (buff != 'd') // парсим длинну заголовка
+                    {
+                        if (char.IsDigit(buff))
+                        {
+                            sizeHeadStr += buff;
+                        }
+                        buff = readFile.ReadChar();
+                    }
+                    Encoding uni = Encoding.Unicode;
+                    int sizeHead = Convert.ToInt32(sizeHeadStr);
+                    string header = uni.GetString(readFile.ReadBytes(sizeHead));
+                    archiveSzEntry[i] = new ArchiveSzEntry(header);
+                    buff = readFile.ReadChar();
+
+                }
+
+
+            }
+
 			//FileInfo info = new FileInfo(archive.Name);
 			//pathToArchive = info.FullName;
         }
