@@ -53,7 +53,7 @@ namespace ArchivyFiles
 			//FileInfo info = new FileInfo(archive.Name);
 			//pathToArchive = info.FullName;
         }
-        public void addFile(string pathToFile)
+        public void AddFile(string pathToFile)
         {
             bool ifFileEmpty = true;
             using (FileStream archFile = new FileStream(pathToArchive, FileMode.Open))
@@ -187,7 +187,7 @@ namespace ArchivyFiles
                 File.Replace(pathToArchive + 1, pathToArchive, "rezerv.txt");
             }
         }
-        public void extractFile(string pathToFile, string pathFileDirectory)
+        public void ExtractFile(string pathToFile, string pathFileDirectory)
         {
             using (BinaryReader readFile = new BinaryReader(new FileStream(pathToArchive, FileMode.Open)))
             {
