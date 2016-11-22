@@ -26,6 +26,7 @@ using ArchivyFiles;
 
 namespace Archivy
 {
+    enum ExtensionArchive {ZIP, SZ, UNKNOWN};
 	/// <summary>
 	/// Логика взаимодействия для MainWindow.xaml
 	/// </summary>
@@ -34,18 +35,18 @@ namespace Archivy
 		private string pathToArchive = "";
 		private string nameTmpDirectory = @"\Archivy\";
         private string currentDirectory = "";
+        private ExtensionArchive extensionArchive = ExtensionArchive.UNKNOWN;
 		public MainWindow()
 		{
-
-            ArchiveSz per;
-            using (FileStream stream = new FileStream("Arch.sz", FileMode.Append))
-            {
-                per = new ArchiveSz(stream);
-            }
-            per.AddFile("test1.txt");
-            per.AddFile("test2.txt");
-            per.AddFile("test2.txt");
-            per.AddFile("test1.txt");
+            //ArchiveSz per;
+            //using (FileStream stream = new FileStream("Arch.sz", FileMode.Append))
+            //{
+            //    per = new ArchiveSz(stream);
+            //}
+            //per.AddFile("test1.txt");
+            //per.AddFile("test2.txt");
+            //per.AddFile("test2.txt");
+            //per.AddFile("test1.txt");
             //per.AddFile("test3.txt");
 
 
@@ -59,8 +60,33 @@ namespace Archivy
 		//{
 			
 		//}
+        private void WhatExtensionArchive()
+        {
+            string _extensionArchive = Path.GetExtension(pathToArchive);
+            if (_extensionArchive == "zip")
+            {
+                extensionArchive = ExtensionArchive.ZIP;
+            }
+            if (_extensionArchive == "sz")
+            {
+                extensionArchive = ExtensionArchive.SZ;
+            }
+
+            extensionArchive = ExtensionArchive.UNKNOWN;
+        }
 		private void UpdateListBox(string subDirectory)
 		{
+            if (Path.GetExtension(pathToArchive) == "sz")
+            {
+                ArchiveSz archive = new ArchiveSz(pathToArchive);
+                Binding binding1 = new Binding();
+                //ZipArchiveEntry back;
+                binding1.Source = archive.archiveSzEntry;
+                fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
+                extensionArchive = ExtensionArchive.SZ;
+                return;
+            }
+            
 			using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
 			{
                 List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
@@ -68,22 +94,22 @@ namespace Archivy
                 {
                     if (subDirectory.Length != 0 && entry.FullName.IndexOf(subDirectory) == 0 && entry.FullName != subDirectory)
                     {
-                        //MessageBox.Show("checking "+entry.FullName);
                         int count = 0;
                         string entryName = entry.FullName.Remove(0, subDirectory.Length);
                         foreach (char c in entryName)
-                            if (c == '/') count++;
+                        {
+                            if (c == '/')
+                                count++;
+                        }
                         bool isFile = count == 0 && entryName == entry.Name;
                         bool isFolder = count == 1 && entryName.EndsWith("/");
                         if (isFile ^ isFolder)
                         {
-                            //MessageBox.Show("Adding " + entryName);
                             entries.Add(entry);
                         }
                     }
                     else if(subDirectory.Length == 0)
                     {
-                        //MessageBox.Show(entry.FullName);
                         int count = 0;
                         foreach (char c in entry.FullName)
                             if (c == '/') count++;
@@ -94,12 +120,12 @@ namespace Archivy
                     }
                 }
 				Binding binding1 = new Binding();
-                ZipArchiveEntry back;
-                //back.FullName = subdirectory;			
+                //ZipArchiveEntry back;
 				binding1.Source = entries;
 				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
 			}
             currentDirectory = subDirectory;
+            extensionArchive = ExtensionArchive.ZIP;
 		}
 		private void ResetTmpDirectory()
 		{
@@ -120,25 +146,45 @@ namespace Archivy
 		/* ----- Меню Файл ----- */
 		private void Create_Archivy_Click(object sender, RoutedEventArgs e)
 		{
-
-
-
-
 			SaveFileDialog createArchivy = new SaveFileDialog();
 			createArchivy.FileName = "Archive";
 			createArchivy.DefaultExt = ".zip";
-			createArchivy.Filter = "ZIP Архив (.zip)|*.zip";
+			createArchivy.Filter = "ZIP Архив (.zip)|*.zip" + "|SZ Архив (.sz)|*.sz";
 
 			Nullable<bool> result = createArchivy.ShowDialog();
 
 			if (result == true)
 			{
-				DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(Path.GetTempPath(), @"\New_Folder_For_Zip"));
-				dirInfo.Create();
+                switch (createArchivy.FilterIndex)
+                {
+                    case 1:
+                        {
+                            DirectoryInfo dirInfo = new DirectoryInfo(Path.Combine(Path.GetTempPath(), @"\New_Folder_For_Zip"));
 
-				ZipFile.CreateFromDirectory(dirInfo.FullName, createArchivy.FileName);
-				dirInfo.Delete();
-				pathToArchive = createArchivy.FileName;
+                            dirInfo.Create();
+
+                            ZipFile.CreateFromDirectory(dirInfo.FullName, createArchivy.FileName);
+
+                            dirInfo.Delete();
+                            pathToArchive = createArchivy.FileName;
+                            extensionArchive = ExtensionArchive.ZIP;
+                            break;
+                        }
+                    case 2:
+                        {
+                            pathToArchive = createArchivy.FileName;
+                            File.Create(pathToArchive);
+                            extensionArchive = ExtensionArchive.SZ;
+                            break;
+                        }
+                    default:
+                        {
+                            MessageBox.Show("Error");
+                            extensionArchive = ExtensionArchive.UNKNOWN;
+                            break;
+                        }
+                }
+                // создание SZ архива
 			}
 		}
 		private void Open_Archivy_Click(object sender, RoutedEventArgs e)
