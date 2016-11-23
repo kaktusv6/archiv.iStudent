@@ -12,31 +12,31 @@ namespace ArchivyFiles
 
     class ArchiveSzEntry
     {
-        public string Name = string.Empty;
-        public string Data = string.Empty;
-        public string SizeBefore = string.Empty;
-        public string SizeAfter = string.Empty;
+        public string FullName;
+        public string LastWriteTime;
+        public string Length;
+        public string CompressedLength;
 
         public ArchiveSzEntry(string header)
         {
             int i = 0;
             while (header[i] != '|')
             {
-                Name += header[i++];
+                FullName += header[i++];
             }
 
             while (header[i] != ' '){
-                SizeBefore += header[++i];
+                Length += header[++i];
             }
             i++;
             while (header[i] != ' ')
             {
-                SizeAfter += header[i++];
+                CompressedLength += header[i++];
             }
             i++;
             while (i <= header.Length-1)
             {
-                Data += header[i++];
+                LastWriteTime += header[i++];
             }
         }
     }
@@ -53,59 +53,13 @@ namespace ArchivyFiles
             if (archive.Length == 0)
             {
                 Entries = new ArchiveSzEntry[0];
+                return;
             }
-            else {
-                using (BinaryReader readFile = new BinaryReader(archive))
-                {
-                    char buff = readFile.ReadChar();
-                    string allFilesStr = string.Empty;
-                    while (!char.IsLetter(buff)) // парсим количество файлов в архиве
-                    {
-                        if (char.IsDigit(buff))
-                        {
-                            allFilesStr += buff;
-                        }
-                        buff = readFile.ReadChar();
-                    }
-                    int allHead = Convert.ToInt32(allFilesStr);
-                    Entries = new ArchiveSzEntry[allHead];
-                    for (int i = 0; i < allHead; i++)
-                    {
-
-                        string sizeHeadStr = string.Empty;
-                        while (buff != 'd') // парсим длинну заголовка
-                        {
-                            if (char.IsDigit(buff))
-                            {
-                                sizeHeadStr += buff;
-                            }
-                            buff = readFile.ReadChar();
-                        }
-                        Encoding uni = Encoding.Unicode;
-                        int sizeHead = Convert.ToInt32(sizeHeadStr);
-                        string header = uni.GetString(readFile.ReadBytes(sizeHead));
-                        Entries[i] = new ArchiveSzEntry(header);
-                        buff = readFile.ReadChar();
-
-                    }
-
-                }
-            }
-
-			//FileInfo info = new FileInfo(archive.Name);
-			//pathToArchive = info.FullName;
-        }
-        public ArchiveSz(string _pathToArchive)
-        {
-            pathToArchive = _pathToArchive;
-            
-            FileStream archive = new FileStream(pathToArchive, FileMode.Open);
             
             using (BinaryReader readFile = new BinaryReader(archive))
             {
                 char buff = readFile.ReadChar();
                 string allFilesStr = string.Empty;
-                
                 while (!char.IsLetter(buff)) // парсим количество файлов в архиве
                 {
                     if (char.IsDigit(buff))
@@ -114,15 +68,12 @@ namespace ArchivyFiles
                     }
                     buff = readFile.ReadChar();
                 }
-                
                 int allHead = Convert.ToInt32(allFilesStr);
-                
                 Entries = new ArchiveSzEntry[allHead];
-
                 for (int i = 0; i < allHead; i++)
                 {
+
                     string sizeHeadStr = string.Empty;
-                
                     while (buff != 'd') // парсим длинну заголовка
                     {
                         if (char.IsDigit(buff))
@@ -131,19 +82,73 @@ namespace ArchivyFiles
                         }
                         buff = readFile.ReadChar();
                     }
-                
                     Encoding uni = Encoding.Unicode;
                     int sizeHead = Convert.ToInt32(sizeHeadStr);
                     string header = uni.GetString(readFile.ReadBytes(sizeHead));
-                
                     Entries[i] = new ArchiveSzEntry(header);
                     buff = readFile.ReadChar();
+
+                }
+            }
+            archive.Close();
+        }
+        public ArchiveSz(string _pathToArchive)
+        {
+            using(FileStream archive = new FileStream(_pathToArchive, FileMode.Open))
+            {
+                pathToArchive = archive.Name;
+            
+                if (archive.Length == 0)
+                {
+                    Entries = new ArchiveSzEntry[0];
+                    return;
+                }
+            
+                using (BinaryReader readFile = new BinaryReader(archive))
+                {
+                    char buff = readFile.ReadChar();
+                    string allFilesStr = string.Empty;
+                
+                    while (!char.IsLetter(buff)) // парсим количество файлов в архиве
+                    {
+                        if (char.IsDigit(buff))
+                        {
+                            allFilesStr += buff;
+                        }
+                        buff = readFile.ReadChar();
+                    }
+                
+                    int allHead = Convert.ToInt32(allFilesStr);
+                
+                    Entries = new ArchiveSzEntry[allHead];
+
+                    for (int i = 0; i < allHead; i++)
+                    {
+                        string sizeHeadStr = string.Empty;
+                
+                        while (buff != 'd') // парсим длинну заголовка
+                        {
+                            if (char.IsDigit(buff))
+                            {
+                                sizeHeadStr += buff;
+                            }
+                            buff = readFile.ReadChar();
+                        }
+                
+                        Encoding uni = Encoding.Unicode;
+                        int sizeHead = Convert.ToInt32(sizeHeadStr);
+                        string header = uni.GetString(readFile.ReadBytes(sizeHead));
+                
+                        Entries[i] = new ArchiveSzEntry(header);
+                        buff = readFile.ReadChar();
+                    }
                 }
             }
         }
         public void AddFile(string pathToFile)
         {
             bool ifFileEmpty = true;
+            
             using (FileStream archFile = new FileStream(pathToArchive, FileMode.Open))
             {                
                 string fileNameSz = ArchivySnappy.Compress(pathToFile);
@@ -157,7 +162,7 @@ namespace ArchivyFiles
                 string header = string.Empty;
                 string sizeByteHead = string.Empty;
 
-                using(FileStream szArch = new FileStream(fileNameSz, FileMode.Open)){
+                using(FileStream szArch = new FileStream(fileNameSz, FileMode.Open)) {
                     Encoding uni = Encoding.Unicode;
                     string NameFile = info.Name;
                     DateTime data = info.LastWriteTime;
