@@ -514,11 +514,11 @@ namespace Archivy
 			// Выводить инфу о программе тоже отдельное окно
 		}
 
-        private void storeFolder(string foldername, string parentfolder)
+        private void StoreFolder(string folderName, string parentFolder)
         {
             String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
-            string[] filecontent = Directory.GetFiles(foldername);
-            string[] directories = Directory.GetDirectories(foldername);
+            string[] filecontent = Directory.GetFiles(folderName);
+            string[] directories = Directory.GetDirectories(folderName);
             foreach (string file in filecontent)
             {
                 string temp = file;
@@ -543,7 +543,7 @@ namespace Archivy
                                 }
                             }
 
-                            ZipArchiveEntry newEntry = archive.CreateEntry(parentfolder+ "\\" + foldername + temp);
+                            ZipArchiveEntry newEntry = archive.CreateEntry(parentFolder+ "\\" + folderName + temp);
                             using (Stream writer = newEntry.Open())
                             {
                                 fileStream.CopyTo(writer);
@@ -559,8 +559,7 @@ namespace Archivy
             UpdateListBox("");
         }
 
-        
-        private void dropfile(object sender, DragEventArgs e)
+        private void Drop_File(object sender, DragEventArgs e)
         {
             String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
             if (pathToArchive.Length == 0)
@@ -581,7 +580,7 @@ namespace Archivy
                     if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                     {
                         DirectoryInfo dir = new DirectoryInfo(file);
-                        storeFolder(dir.FullName, "");
+                        StoreFolder(dir.FullName, "");
                     }
                     else
                     {
@@ -623,8 +622,7 @@ namespace Archivy
                 UpdateListBox("");
             }
         }
-
-        private void ClickElement(object sender, MouseButtonEventArgs e)
+        private void Click_Element(object sender, MouseButtonEventArgs e)
         {
             //MessageBox.Show(sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", ""));
             if (sender.ToString().EndsWith("/"))
@@ -637,17 +635,6 @@ namespace Archivy
                 MessageBox.Show("Not implemented yet");
             }
         }
-		~MainWindow()
-		{
-			Directory.Delete(
-				Path.Combine(
-					Path.GetTempPath(),
-					nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)
-				),
-				true
-			);
-		}
-
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             //MessageBox.Show(currentDirectory);
@@ -662,5 +649,16 @@ namespace Archivy
                 UpdateListBox(currentDirectory);
             }
         }
+
+		~MainWindow()
+		{
+			Directory.Delete(
+				Path.Combine(
+					Path.GetTempPath(),
+					nameTmpDirectory.Substring(0, nameTmpDirectory.Length - 1)
+				),
+				true
+			);
+		}
     }
 }
