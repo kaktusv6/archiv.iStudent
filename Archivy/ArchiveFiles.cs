@@ -280,20 +280,19 @@ namespace ArchivyFiles
                 File.Replace(pathToArchive + 1, pathToArchive, "rezerv.txt");
             }
         }
+
         public void AddFile(FileInfo fileInfo)
         {
             this.AddFile(fileInfo.ToString());
         }
-        public void ExtractFile(string pathToFile, string pathFileDirectory)
+
+        public void Unpacking(string pathToFile, string pathFileDirectory)
         {
             using (BinaryReader readFile = new BinaryReader(new FileStream(pathToArchive, FileMode.Open)))
             {
-                using (BinaryWriter newFile = new BinaryWriter(new FileStream(pathToArchive + 1, FileMode.Append)))
-                {
                     char sym = readFile.ReadChar();
                     string allFilesStr = string.Empty;
                     Encoding uni = Encoding.Unicode;
-                    Entries = new ArchiveSzEntry[Entries.Length - 1];
 
                     while (!char.IsLetter(sym)) // парсим количество файлов в архиве
                     {
@@ -306,12 +305,9 @@ namespace ArchivyFiles
                     int before = 0;
                     int toSnappyFile = 0;
                     int sizeAllSnappyCode = 0;
-                    
+                   
                     int allFiles = Convert.ToInt32(allFilesStr);
-                    if ((allFiles - 1) != 0)
-                    {
-                        newFile.Write(Convert.ToString(allFiles - 1));
-                    }
+
                     int k = 0;
                     for (int i = 0; i < allFiles; i++) //парсим голову файлов
                     {
@@ -353,7 +349,92 @@ namespace ArchivyFiles
                         }
                         else
                         {
-                            Entries[k] = new ArchiveSzEntry(header);
+                            Entries[k++] = new ArchiveSzEntry(header);
+                            sizeAllSnappyCode += sizeSnappy;
+                        }
+                    }
+
+                    string fullPath = pathFileDirectory + "\\" + pathToFile + ".sz";
+                    using (BinaryWriter SnappyFile = new BinaryWriter(new FileStream(fullPath, FileMode.Append)))
+                    {
+                        readFile.ReadBytes(before);
+                        SnappyFile.Write(readFile.ReadBytes(toSnappyFile));
+                    }
+                    ArchivySnappy.Decompress(fullPath);
+                    File.Delete(fullPath);
+            }
+        }
+
+        public void ExtractFile(string pathToFile, string pathFileDirectory)
+        {
+            using (BinaryReader readFile = new BinaryReader(new FileStream(pathToArchive, FileMode.Open)))
+            {
+                using (BinaryWriter newFile = new BinaryWriter(new FileStream(pathToArchive + 1, FileMode.Append)))
+                {
+                    char sym = readFile.ReadChar();
+                    string allFilesStr = string.Empty;
+                    Encoding uni = Encoding.Unicode;
+                    Entries = new ArchiveSzEntry[Entries.Length];
+
+                    while (!char.IsLetter(sym)) // парсим количество файлов в архиве
+                    {
+                        if (char.IsDigit(sym))
+                        {
+                            allFilesStr += sym;
+                        }
+                        sym = readFile.ReadChar();
+                    }
+                    int before = 0;
+                    int toSnappyFile = 0;
+                    int sizeAllSnappyCode = 0;
+                    
+                    int allFiles = Convert.ToInt32(allFilesStr);
+                    if ((allFiles - 1) != 0)
+                    {
+                        newFile.Write(Convert.ToString(allFiles));
+                    }
+                    int k = 0;
+                    for (int i = 0; i < allFiles; i++) //парсим голову файлов
+                    {
+                        int sizeHeadInt = 0;
+                        int sizeSnappy = 0;
+                        string nameFile = string.Empty;
+                        string sizeHeadStr = string.Empty;
+                        string header = string.Empty;
+                        string sizeSnappyStr = string.Empty;
+                        sym = readFile.ReadChar();
+
+                        while (sym != 'd') {
+                            if (char.IsDigit(sym)){
+                                sizeHeadStr += sym;
+                            }
+                            sym = readFile.ReadChar();
+                        }
+                        sizeHeadInt = Convert.ToInt32(sizeHeadStr);
+                        header = uni.GetString(readFile.ReadBytes(sizeHeadInt));//считал заголовочный файл
+
+                        int j = 0;
+                        
+                        while(header[j] != '|'){
+                            nameFile += header[j];
+                            j++;
+                        }
+                        j++;
+                        while (header[j] != ' ')
+                        {
+                            sizeSnappyStr += header[j];
+                            j++;
+                        }
+
+                        sizeSnappy = Convert.ToInt32(sizeSnappyStr);
+                        Entries[k] = new ArchiveSzEntry(header);
+
+                        if  (nameFile.Equals(pathToFile)){
+                            toSnappyFile = sizeSnappy;
+                            before = sizeAllSnappyCode;
+                        }
+                        else
+                        {
                             newFile.Write('s' + sizeHeadStr + 'd');
                             newFile.Write(uni.GetBytes(header));
                             sizeAllSnappyCode += sizeSnappy;
@@ -369,6 +450,94 @@ namespace ArchivyFiles
                     newFile.Write(readFile.ReadBytes(sizeAllSnappyCode - before));
                     ArchivySnappy.Decompress(fullPath);
                     File.Delete(fullPath);
+                }
+            }
+            File.Replace(pathToArchive + 1, pathToArchive, "rezerv.txt");
+        }
+
+        public void DeleteFile(string pathToFile)
+        {
+            using (BinaryReader readFile = new BinaryReader(new FileStream(pathToArchive, FileMode.Open)))
+            {
+                using (BinaryWriter newFile = new BinaryWriter(new FileStream(pathToArchive + 1, FileMode.Append)))
+                {
+                    char sym = readFile.ReadChar();
+                    string allFilesStr = string.Empty;
+                    Encoding uni = Encoding.Unicode;
+                    Entries = new ArchiveSzEntry[Entries.Length - 1];
+
+                    while (!char.IsLetter(sym)) // парсим количество файлов в архиве
+                    {
+                        if (char.IsDigit(sym))
+                        {
+                            allFilesStr += sym;
+                        }
+                        sym = readFile.ReadChar();
+                    }
+                    int before = 0;
+                    int toDeletedFile = 0;
+                    int sizeAllCode = 0;
+
+                    int allFiles = Convert.ToInt32(allFilesStr);
+                    if ((allFiles - 1) != 0)
+                    {
+                        newFile.Write(Convert.ToString(allFiles - 1));
+                    }
+                    int k = 0;
+                    for (int i = 0; i < allFiles; i++) //парсим голову файлов
+                    {
+                        int sizeHeadInt = 0;
+                        int sizeSnappy = 0;
+                        string nameFile = string.Empty;
+                        string sizeHeadStr = string.Empty;
+                        string header = string.Empty;
+                        string sizeSnappyStr = string.Empty;
+                        sym = readFile.ReadChar();
+
+                        while (sym != 'd')
+                        {
+                            if (char.IsDigit(sym))
+                            {
+                                sizeHeadStr += sym;
+                            }
+                            sym = readFile.ReadChar();
+                        }
+                        sizeHeadInt = Convert.ToInt32(sizeHeadStr);
+                        header = uni.GetString(readFile.ReadBytes(sizeHeadInt));//считал заголовочный файл
+
+                        int j = 0;
+
+                        while (header[j] != '|')
+                        {
+                            nameFile += header[j];
+                            j++;
+                        }
+                        j++;
+                        while (header[j] != ' ')
+                        {
+                            sizeSnappyStr += header[j];
+                            j++;
+                        }
+
+                        sizeSnappy = Convert.ToInt32(sizeSnappyStr);
+
+                        if (nameFile.Equals(pathToFile))
+                        {
+                            toDeletedFile = sizeSnappy;
+                            before = sizeAllCode;
+                        }
+                        else
+                        {
+                            Entries[k] = new ArchiveSzEntry(header);
+                            newFile.Write('s' + sizeHeadStr + 'd');
+                            newFile.Write(uni.GetBytes(header));
+                            sizeAllCode += sizeSnappy;
+                            k++;
+                        }
+                    }
+                    newFile.Write(readFile.ReadBytes(before));
+
+                    newFile.Write(readFile.ReadBytes(sizeAllCode - before));
                 }
             }
             File.Replace(pathToArchive + 1, pathToArchive, "rezerv.txt");
