@@ -76,17 +76,19 @@ namespace Archivy
         }
 		private void UpdateListBox(string subDirectory)
 		{
+            Binding binding = new Binding();
+            
             if (Path.GetExtension(pathToArchive) == ".sz")
             {
                 using(FileStream fs = new FileStream(pathToArchive, FileMode.Open))
                 {
                     ArchiveSz archive = new ArchiveSz(fs);
-                    Binding binding1 = new Binding();
-                    //ZipArchiveEntry back;
-                    binding1.Source = archive.Entries;
-                    fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
+
+                    binding.Source = archive.Entries;
+                    fileList.SetBinding(ListBox.ItemsSourceProperty, binding);
                     extensionArchive = ExtensionArchive.SZ;
-                }   
+                    fs.Close();
+                }
                 return;
             }
             
@@ -122,10 +124,9 @@ namespace Archivy
                         }
                     }
                 }
-				Binding binding1 = new Binding();
-                //ZipArchiveEntry back;
-				binding1.Source = entries;
-				fileList.SetBinding(ListBox.ItemsSourceProperty, binding1);
+				binding = new Binding();
+				binding.Source = entries;
+				fileList.SetBinding(ListBox.ItemsSourceProperty, binding);
 			}
             currentDirectory = subDirectory;
             extensionArchive = ExtensionArchive.ZIP;
@@ -152,7 +153,7 @@ namespace Archivy
 			SaveFileDialog createArchivy = new SaveFileDialog();
 			createArchivy.FileName = "Archive";
 			createArchivy.DefaultExt = ".zip";
-			createArchivy.Filter = "ZIP Архив (.zip)|*.zip" + "|SZ Архив (.sz)|*.sz";
+			createArchivy.Filter = "ZIP Архив|*.zip" + "|SZ Архив|*.sz";
 
 			Nullable<bool> result = createArchivy.ShowDialog();
 
@@ -193,7 +194,7 @@ namespace Archivy
 		private void Open_Archivy_Click(object sender, RoutedEventArgs e)
 		{
 			OpenFileDialog fileDialog = new OpenFileDialog();
-			fileDialog.Filter = "Архивы (.zip)|*.zip" + "|SZ Архив|*.sz" + "|Все файлы (*.*)|*.*";
+			fileDialog.Filter = "ZIP Архив|*.zip" + "|SZ Архив|*.sz" + "|Все файлы (*.*)|*.*";
 			fileDialog.FilterIndex = 1;
 			fileDialog.CheckFileExists = true;
 			fileDialog.Multiselect = false;
@@ -203,20 +204,6 @@ namespace Archivy
 			if (result == true)
 			{
 				pathToArchive = fileDialog.FileName;
-                /*switch(fileDialog.FilterIndex)
-                {
-                    case 1:
-                        {
-                            
-                            break;
-                        }
-                    case 2:
-                        {
-
-                            break;
-                        }
-                    default: break;
-                }*/
 				UpdateListBox("");
 			}
 		}
@@ -256,10 +243,12 @@ namespace Archivy
                     }
                     case ExtensionArchive.SZ:
                     {
+                        string pathToDirectory = folderDialog.SelectedPath;
                         ArchiveSz archive = new ArchiveSz(pathToArchive);
+
                         foreach(ArchiveSzEntry entry in archive.Entries)
                         {
-                            archive.ExtractFile(entry.Name, folderDialog.SelectedPath);
+                            archive.ExtractFile(entry.FullName, pathToDirectory);
                         }
                         break;
                     }
@@ -328,10 +317,8 @@ namespace Archivy
                     {
                         for (int i = 0; i < files.Length; i++)
                         {
-                            FileInfo fileInfo = new FileInfo(files[i]);
                             ArchiveSz archive = new ArchiveSz(pathToArchive);
-                            
-                            archive.AddFile(fileInfo.ToString());                           
+                            archive.AddFile(files[i]);
                         }
                         break;
                     }
