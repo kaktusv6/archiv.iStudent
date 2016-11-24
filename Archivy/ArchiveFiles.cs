@@ -537,7 +537,7 @@ namespace ArchivyFiles
                         }
                     }
                     newFile.Write(readFile.ReadBytes(before));
-
+                    readFile.ReadBytes(toDeletedFile);
                     newFile.Write(readFile.ReadBytes(sizeAllCode - before));
                 }
             }
