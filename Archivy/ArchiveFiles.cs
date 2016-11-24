@@ -356,7 +356,7 @@ namespace ArchivyFiles
                     }
 
                     string fullPath = pathFileDirectory + "\\" + pathToFile + ".sz";
-                    using (BinaryWriter SnappyFile = new BinaryWriter(new FileStream(fullPath, FileMode.Open)))
+                    using (BinaryWriter SnappyFile = new BinaryWriter(new FileStream(fullPath, FileMode.Append)))
                     {
                         readFile.ReadBytes(before);
                         SnappyFile.Write(readFile.ReadBytes(toSnappyFile));
