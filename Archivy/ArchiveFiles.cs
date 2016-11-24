@@ -274,6 +274,7 @@ namespace ArchivyFiles
                         }
                     } 
                 }
+                File.Delete(fileNameSz);
             }
             if (ifFileEmpty)
             {
