@@ -54,15 +54,12 @@ namespace Archivy
             
             if (Path.GetExtension(pathToArchive) == ".sz")
             {
-                using(FileStream fs = new FileStream(pathToArchive, FileMode.Open))
-                {
-                    ArchiveSz archive = new ArchiveSz(fs);
+                ArchiveSz archive = new ArchiveSz(pathToArchive);
 
-                    binding.Source = archive.Entries;
-                    fileList.SetBinding(ListBox.ItemsSourceProperty, binding);
-                    extensionArchive = ExtensionArchive.SZ;
-                    fs.Close();
-                }
+                fileList.ItemsSource = archive.Entries;
+                //binding.Source = archive.Entries;
+                //fileList.SetBinding(ListBox.ItemsSourceProperty, binding);
+                extensionArchive = ExtensionArchive.SZ;
                 return;
             }
             
@@ -201,14 +198,14 @@ namespace Archivy
                         foreach (ZipArchiveEntry entry in archiv.Entries)
                         {
                             // TODO: переписать распаковку всех файлов архива zip
-                            String fullName = Path.Combine(folderDialog.SelectedPath, entry.FullName);
-                            entry.ExtractToFile(fullName);
+                            String FullName = Path.Combine(folderDialog.SelectedPath, entry.FullName);
+                            entry.ExtractToFile(FullName);
                             FileInfo entryInfo = new FileInfo(Path.GetFullPath(entry.FullName));
 
                             if (entryInfo.Extension == ".sz")
                             {
-                                ArchivySnappy.Decompress(fullName);
-                                File.Delete(fullName);
+                                ArchivySnappy.Decompress(FullName);
+                                File.Delete(FullName);
                             }
 
                         }
