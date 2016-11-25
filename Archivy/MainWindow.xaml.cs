@@ -150,7 +150,10 @@ namespace Archivy
                     case 2:
                     {
                         pathToArchive = createArchivy.FileName;
-                        File.Create(pathToArchive);
+                        using (FileStream fs = File.Create(pathToArchive))
+                        {
+                            fs.Close();
+                        }
                         extensionArchive = ExtensionArchive.SZ;
                         break;
                     }
@@ -295,10 +298,37 @@ namespace Archivy
                     }
                     case ExtensionArchive.SZ:
                     {
+                        ArchiveSz archive = new ArchiveSz(pathToArchive);
+                        
                         for (int i = 0; i < files.Length; i++)
                         {
-                            ArchiveSz archive = new ArchiveSz(pathToArchive);
-                            archive.AddFile(files[i]);
+                            string pathToFile = files[i];
+                            string pathCopyFile = string.Empty;
+
+                            foreach(ArchiveSzEntry entry in archive.Entries)
+                            {
+                                if(Path.GetFileName(files[i]) == entry.FullName)
+                                {
+                                    pathCopyFile = Path.GetTempPath() + "\\(Copy)" + Path.GetFileName(pathToFile);
+                                    
+                                    using(FileStream newFile = File.Create(pathCopyFile))
+                                    {
+                                        using (FileStream oldFile = File.Open(pathToFile, FileMode.Open))
+                                        {
+                                            oldFile.CopyTo(newFile);
+                                        }
+                                    }
+                                    
+                                    pathToFile = pathCopyFile;
+                                }
+                            }
+
+                            archive.AddFile(pathToFile);
+                            
+                            if(pathCopyFile != string.Empty)
+                            {
+                                File.Delete(pathCopyFile);
+                            }
                         }
                         break;
                     }
@@ -466,7 +496,33 @@ namespace Archivy
                         bool isDocument = extensionsDocuments.IndexOf(Path.GetExtension(files[i])) == -1;
                         if (isDocument)
                         {
-                            archive.AddFile(files[i]);
+                            string pathToFile = files[i];
+                            string pathCopyFile = string.Empty;
+
+                            foreach (ArchiveSzEntry entry in archive.Entries)
+                            {
+                                if (Path.GetFileName(files[i]) == entry.FullName)
+                                {
+                                    pathCopyFile = Path.GetTempPath() + "\\(Copy)" + Path.GetFileName(pathToFile);
+
+                                    using (FileStream newFile = File.Create(pathCopyFile))
+                                    {
+                                        using (FileStream oldFile = File.Open(pathToFile, FileMode.Open))
+                                        {
+                                            oldFile.CopyTo(newFile);
+                                        }
+                                    }
+
+                                    pathToFile = pathCopyFile;
+                                }
+                            }
+
+                            archive.AddFile(pathToFile);
+
+                            if (pathCopyFile != string.Empty)
+                            {
+                                File.Delete(pathCopyFile);
+                            }
                         }
                     }
                     break;
