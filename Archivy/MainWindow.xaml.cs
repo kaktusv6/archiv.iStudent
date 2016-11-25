@@ -68,6 +68,7 @@ namespace Archivy
                 List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
+                    //MessageBox.Show("Observing " + entry.FullName);
                     if (subDirectory.Length != 0 && entry.FullName.IndexOf(subDirectory) == 0 && entry.FullName != subDirectory)
                     {
                         int count = 0;
@@ -585,10 +586,11 @@ namespace Archivy
                 using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                 {
                     ZipArchiveEntry readmeEntry;
+                    readmeEntry = archive.CreateEntry(parentFolder + folderName.Name + "/");
                     FileInfo[] Files = folderName.GetFiles();
                     foreach (FileInfo file in Files)
                     {
-                        MessageBox.Show("adding " + parentFolder + folderName.Name + "/" + file.Name);
+                        //MessageBox.Show("adding " + parentFolder + folderName.Name + "/" + file.Name);
                         readmeEntry = archive.CreateEntryFromFile(folderName.FullName + "\\" + file.Name, parentFolder + folderName.Name + "/" + file.Name);
                     }
                 }
