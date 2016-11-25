@@ -236,11 +236,20 @@ namespace Archivy
 
             OpenFileDialog fileDialog = new OpenFileDialog();
             
-            fileDialog.Filter = "Все файлы (*.*)|*.*";
+            string filter = "Все файлы (*.*)|*.*";
+            switch(extensionArchive)
+            {
+                case ExtensionArchive.SZ:
+                {
+                    filter = "Документы|*.docx;*.doc;*.xlsx;*.xls;*.rtf;*.txt;*.html";
+                    break;
+                }
+                default: break;
+            }
+            fileDialog.Filter = filter;
             fileDialog.FilterIndex = 1;
             fileDialog.CheckFileExists = false;
             fileDialog.Multiselect = true;
-
 
             Nullable<bool> result = fileDialog.ShowDialog();
 
@@ -450,10 +459,14 @@ namespace Archivy
                 case ExtensionArchive.SZ:
                 {
                     ArchiveSz archive = new ArchiveSz(pathToArchive);
-
+                    string extensionsDocuments = ".docx *.doc *.xlsx *.xls *.rtf *.txt *.html";
                     for(int i = 0; i < files.Count; i++)
                     {
-                        archive.AddFile(files[i]);
+                        bool isDocument = extensionsDocuments.IndexOf(Path.GetExtension(files[i])) == -1;
+                        if (isDocument)
+                        {
+                            archive.AddFile(files[i]);
+                        }
                     }
                     break;
                 }
