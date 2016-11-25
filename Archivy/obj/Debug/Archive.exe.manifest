@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Archive.exe" size="805288">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Archive.exe" size="806312">
       <assemblyIdentity name="Archive" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>1oYiww3Q4/w2GKMN7rKaCygHJkoKiRKz1b6r/05xx3k=</dsig:DigestValue>
+        <dsig:DigestValue>5BhxLz6x8IOV2ZfQiphlF2piKpeVi74v9Fpg77Uw2jQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

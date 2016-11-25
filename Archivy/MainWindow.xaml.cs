@@ -724,13 +724,37 @@ namespace Archivy
                 }
                     case ExtensionArchive.SZ:
                         {
-                            foreach(string file in files)
+                            ArchiveSz archive = new ArchiveSz(pathToArchive);
+                            foreach (string file in files)
                             {
+                                string pathToFile = file;
+                                string pathCopyFile = string.Empty;
                                 FileInfo checker = new FileInfo(file);
                                 if (extens.IndexOf(checker.Extension) != -1)
                                 {
-                                    ArchiveSz archive = new ArchiveSz(pathToArchive);
-                                    archive.AddFile(file); 
+                                    foreach (ArchiveSzEntry entry in archive.Entries)
+                                    {
+                                        if (Path.GetFileName(file) == entry.FullName)
+                                        {
+                                            pathCopyFile = Path.GetTempPath() + "\\(Copy)" + Path.GetFileName(pathToFile);
+
+                                            using (FileStream newFile = File.Create(pathCopyFile))
+                                            {
+                                                using (FileStream oldFile = File.Open(pathToFile, FileMode.Open))
+                                                {
+                                                    oldFile.CopyTo(newFile);
+                                                }
+                                            }
+
+                                            pathToFile = pathCopyFile;
+                                        }
+                                    }
+                                }
+                                archive.AddFile(pathToFile);
+
+                                if (pathCopyFile != string.Empty)
+                                {
+                                    File.Delete(pathCopyFile);
                                 }
                             }
                             break;
