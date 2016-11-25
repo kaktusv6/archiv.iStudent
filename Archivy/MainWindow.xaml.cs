@@ -415,7 +415,7 @@ namespace Archivy
                 }
                 default: break;
             }
-			UpdateListBox("");
+			UpdateListBox(currentDirectory);
 		}
 		private void Past_Files_Click(object sender, RoutedEventArgs e)
 		{
@@ -588,6 +588,7 @@ namespace Archivy
                     FileInfo[] Files = folderName.GetFiles();
                     foreach (FileInfo file in Files)
                     {
+                        MessageBox.Show("adding " + parentFolder + folderName.Name + "/" + file.Name);
                         readmeEntry = archive.CreateEntryFromFile(folderName.FullName + "\\" + file.Name, parentFolder + folderName.Name + "/" + file.Name);
                     }
                 }
@@ -597,11 +598,11 @@ namespace Archivy
             {
                 if (parentFolder.Length == 0)
                 {
-                    StoreFolder(directory, folderName.Name);
+                    StoreFolder(directory, folderName.Name + "/");
                 }
                 else
                 {
-                    StoreFolder(directory, parentFolder + "/" + folderName.Name);
+                    StoreFolder(directory, parentFolder + "/" + folderName.Name + "/");
                 }
             }
             UpdateListBox(currentDirectory);
@@ -618,61 +619,71 @@ namespace Archivy
             
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
+                
                 string[] files = e.Data.GetData(DataFormats.FileDrop, true) as string[];
-                foreach (string file in files)
+                switch (extensionArchive)
                 {
-                    string temp = file;
-                    FileInfo fileInfo = new FileInfo(file);
-
-                    FileAttributes attr = File.GetAttributes(file);
-                    if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                    case ExtensionArchive.ZIP:
+                {
+                    foreach (string file in files)
                     {
-                        DirectoryInfo dir = new DirectoryInfo(file);
-                        StoreFolder(dir, currentDirectory);
-                    }
-                    else
-                    {
+                        string temp = file;
+                        FileInfo fileInfo = new FileInfo(file);
 
-                        if (extens.IndexOf(fileInfo.Extension) != -1 )
+                        FileAttributes attr = File.GetAttributes(file);
+                        if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                         {
-                            temp = ArchivySnappy.Compress(file);
-                            fileInfo = new FileInfo(temp);
+                            DirectoryInfo dir = new DirectoryInfo(file);
+                            StoreFolder(dir, currentDirectory);
                         }
-
-                        using (FileStream fileStream = fileInfo.OpenRead())
+                        else
                         {
-                            using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+                            using (FileStream fileStream = fileInfo.OpenRead())
                             {
-                                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
+                                using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
                                 {
-                                    foreach (ZipArchiveEntry entry in archive.Entries)
+                                    using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                                     {
-                                        if (Path.GetFileName(fileInfo.Name) == Path.GetFileName(entry.FullName))
+                                        foreach (ZipArchiveEntry entry in archive.Entries)
                                         {
-                                            temp = Path.GetDirectoryName(fileInfo.ToString()) + "\\(Copy)" + Path.GetFileName(fileInfo.Name);
+                                            if (Path.GetFileName(fileInfo.Name) == Path.GetFileName(entry.FullName))
+                                            {
+                                                temp = Path.GetDirectoryName(fileInfo.ToString()) + "\\(Copy)" + Path.GetFileName(fileInfo.Name);
+                                            }
                                         }
-                                    }
 
-                                    ZipArchiveEntry newEntry = archive.CreateEntry(Path.GetFileName(temp));
-                                    using (Stream writer = newEntry.Open())
-                                    {
-                                        fileStream.CopyTo(writer);
+                                        ZipArchiveEntry newEntry = archive.CreateEntry(Path.GetFileName(temp));
+                                        using (Stream writer = newEntry.Open())
+                                        {
+                                            fileStream.CopyTo(writer);
+                                        }
                                     }
                                 }
                             }
                         }
-                        if (fileInfo.Extension == ".sz")
-                        {
-                            fileInfo.Delete();
-                        }
                     }
+                            break;  
+                }
+                    case ExtensionArchive.SZ:
+                        {
+                            foreach(string file in files)
+                            {
+                                FileInfo checker = new FileInfo(file);
+                                if (extens.IndexOf(checker.Extension) != -1)
+                                {
+                                    ArchiveSz archive = new ArchiveSz(pathToArchive);
+                                    archive.AddFile(file); 
+                                }
+                            }
+                            break;
+                        }
+                    default:break;
                 }
                 UpdateListBox(currentDirectory);
             }
         }
         private void Click_Element(object sender, MouseButtonEventArgs e)
         {
-            //MessageBox.Show(sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", ""));
             if (sender.ToString().EndsWith("/"))
             {
                 currentDirectory = sender.ToString().Replace("System.Windows.Controls.ListViewItem: ", "");
@@ -685,7 +696,6 @@ namespace Archivy
         }
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            //MessageBox.Show(currentDirectory);
             if (currentDirectory != "")
             {
                 currentDirectory = currentDirectory.Remove(currentDirectory.Length - 1, 1);
@@ -693,7 +703,6 @@ namespace Archivy
                 {
                     currentDirectory = currentDirectory.Remove(currentDirectory.Length - 1, 1);
                 }
-                //MessageBox.Show(currentDirectory);
                 UpdateListBox(currentDirectory);
             }
         }
