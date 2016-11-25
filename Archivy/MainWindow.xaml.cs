@@ -43,15 +43,15 @@ namespace Archivy
 			//Loaded += MainWindow_Loaded;
 		}
 
-		/* Метод который выполняется перед запуском программы */
-		//void MainWindow_Loaded(object sender, RoutedEventArgs e)
-		//{
-			
-		//}
-		private void UpdateListBox(string subDirectory)
-		{
+        /* Метод который выполняется перед запуском программы */
+        //void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        //{
+
+        //}
+        private void UpdateListBox(string subDirectory)
+        {
             Binding binding = new Binding();
-            
+
             if (Path.GetExtension(pathToArchive) == ".sz")
             {
                 ArchiveSz archive = new ArchiveSz(pathToArchive);
@@ -62,9 +62,9 @@ namespace Archivy
                 extensionArchive = ExtensionArchive.SZ;
                 return;
             }
-            
-			using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
-			{
+
+            using (ZipArchive archive = ZipFile.OpenRead(pathToArchive))
+            {
                 List<ZipArchiveEntry> entries = new List<ZipArchiveEntry>();
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
@@ -84,7 +84,7 @@ namespace Archivy
                             entries.Add(entry);
                         }
                     }
-                    else if(subDirectory.Length == 0)
+                    else if (subDirectory.Length == 0)
                     {
                         int count = 0;
                         foreach (char c in entry.FullName)
@@ -95,14 +95,14 @@ namespace Archivy
                         }
                     }
                 }
-				binding = new Binding();
-				binding.Source = entries;
-				fileList.SetBinding(ListBox.ItemsSourceProperty, binding);
-			}
+                binding = new Binding();
+                binding.Source = entries;
+                fileList.SetBinding(ListBox.ItemsSourceProperty, binding);
+            }
             currentDirectory = subDirectory;
             extensionArchive = ExtensionArchive.ZIP;
-		}
-		private void ResetTmpDirectory()
+        }
+        private void ResetTmpDirectory()
 		{
 			Directory.Delete(
 				Path.Combine(
@@ -303,7 +303,7 @@ namespace Archivy
                     }
                     default: break;
                 }
-                UpdateListBox("");
+                UpdateListBox(currentDirectory);
             }
         }
 
@@ -473,7 +473,7 @@ namespace Archivy
                 default: break;
             }
 			
-			UpdateListBox("");
+			UpdateListBox(currentDirectory);
 		}
 		private void Delete_Files_Click(object sender, RoutedEventArgs e)
 		{
@@ -525,7 +525,7 @@ namespace Archivy
                 default: break;
             }
             
-			UpdateListBox("");
+			UpdateListBox(currentDirectory);
 		}
 		private void Rename_File_Click(object sender, RoutedEventArgs e)
 		{
@@ -558,7 +558,7 @@ namespace Archivy
 			WindowRename windowRename = new WindowRename(pathToArchive, oldName, extensionArchive);
 			
             windowRename.ShowDialog();
-			UpdateListBox("");
+			UpdateListBox(currentDirectory);
 		}
 
 		/* ----- Меню Справка ----- */
@@ -574,49 +574,37 @@ namespace Archivy
 			winAbout.ShowDialog();
 		}
 
-        private void StoreFolder(string folderName, string parentFolder)
+        private void StoreFolder(DirectoryInfo folderName, string parentFolder)
         {
+            MessageBox.Show("gonna store a folder");
             String extens = ".doc .docx .rtf .txt .html .xls .xlsx";
-            string[] filecontent = Directory.GetFiles(folderName);
-            string[] directories = Directory.GetDirectories(folderName);
-            foreach (string file in filecontent)
+            bool altered;
+            string newPath = parentFolder;
+            using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
             {
-                string temp = file;
-                FileInfo fileInfo = new FileInfo(file);
-                if (extens.IndexOf(fileInfo.Extension) != -1 )
-                    {
-                        temp = ArchivySnappy.Compress(file);
-                        fileInfo = new FileInfo(temp);
-                    }
-
-                using (FileStream fileStream = fileInfo.OpenRead())
+                using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
                 {
-                    using (FileStream zipToOpen = new FileStream(pathToArchive, FileMode.Open))
+                    ZipArchiveEntry readmeEntry;
+                    FileInfo[] Files = folderName.GetFiles();
+                    foreach (FileInfo file in Files)
                     {
-                        using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Update))
-                        {
-                            foreach (ZipArchiveEntry entry in archive.Entries)
-                            {
-                                if (Path.GetFileName(fileInfo.Name) == Path.GetFileName(entry.FullName))
-                                {
-                                    temp = Path.GetDirectoryName(fileInfo.ToString()) + "\\(Copy)" + Path.GetFileName(fileInfo.Name);
-                                }
-                            }
-
-                            ZipArchiveEntry newEntry = archive.CreateEntry(parentFolder+ "\\" + folderName + temp);
-                            using (Stream writer = newEntry.Open())
-                            {
-                                fileStream.CopyTo(writer);
-                            }
-                        }
+                        readmeEntry = archive.CreateEntryFromFile(folderName.FullName + "\\" + file.Name, parentFolder + folderName.Name + "/" + file.Name);
                     }
-                }
-                if (fileInfo.Extension == ".sz")
-                {
-                    fileInfo.Delete();
                 }
             }
-            UpdateListBox("");
+            DirectoryInfo[] directories = folderName.GetDirectories();
+            foreach (DirectoryInfo directory in directories)
+            {
+                if (parentFolder.Length == 0)
+                {
+                    StoreFolder(directory, folderName.Name);
+                }
+                else
+                {
+                    StoreFolder(directory, parentFolder + "/" + folderName.Name);
+                }
+            }
+            UpdateListBox(currentDirectory);
         }
 
         private void Drop_File(object sender, DragEventArgs e)
@@ -640,7 +628,7 @@ namespace Archivy
                     if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
                     {
                         DirectoryInfo dir = new DirectoryInfo(file);
-                        StoreFolder(dir.FullName, "");
+                        StoreFolder(dir, currentDirectory);
                     }
                     else
                     {
@@ -679,7 +667,7 @@ namespace Archivy
                         }
                     }
                 }
-                UpdateListBox("");
+                UpdateListBox(currentDirectory);
             }
         }
         private void Click_Element(object sender, MouseButtonEventArgs e)
