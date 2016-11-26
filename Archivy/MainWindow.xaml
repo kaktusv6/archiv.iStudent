@@ -29,10 +29,13 @@
                 <MenuItem Header="Об Архиваторе" Click="About_Click"></MenuItem>
             </MenuItem>
         </Menu>
-        <ListView x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,20,0,0" VerticalAlignment="Stretch" BorderThickness="0,1" SelectionMode="Extended" AllowDrop="True" Drop="dropfile">
+        <Button x:Name="Back" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20"  ToolTip="Назад" Click="Back_Click" Height="20">
+            <Image Source="ico-back2.png"></Image>
+        </Button>
+        <ListView x:Name="fileList" HorizontalAlignment="Stretch" Margin="0,20,0,0" VerticalAlignment="Stretch" BorderThickness="0,1" SelectionMode="Extended" AllowDrop="True" Drop="Drop_File">
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
-                    <EventSetter Event="MouseDoubleClick" Handler="ClickElement"/>
+                    <EventSetter Event="MouseDoubleClick" Handler="Click_Element"/>
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.View>
